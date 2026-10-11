@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل السلف والمعاملات</title>
+    <!-- استدعاء خط Cairo وأيقونات FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            color: var(--text);
+        }
+
+        /* الرأس Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* الكارت والنموذج */
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* الموبايل: عمود واحد */
+            gap: 15px;
+        }
+
+        /* الشاشات الكبيرة: عمودين */
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], input[type="date"], select, textarea {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* زر الحفظ والـ Spinner */
+        .submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2><i class="fa-solid fa-file-invoice-dollar"></i> تسجيل السلف والمعاملات</h2>
+        <button class="back-btn" onclick="goHome()">
+            <i class="fa-solid fa-arrow-right"></i> الرجوع للرئيسية
+        </button>
+    </div>
+
+    <div class="card">
+        <form id="advancesForm">
+            <div class="form-grid">
+                
+                <div class="form-group">
+                    <label>تاريخ المعاملة</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>اسم العامل</label>
+                    <select id="employeeName" required>
+                        <option value="">جاري تحميل الأسماء...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>نوع المعاملة</label>
+                    <select id="transactionType" required>
+                        <option value="سلفة">سلفة</option>
+                        <option value="مرتب">مرتب</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>المبلغ (ج.م)</label>
+                    <input type="number" id="amount" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>ملاحظات / البيان</label>
+                    <textarea id="notes" placeholder="اكتب سبب السلفة أو تفاصيل الإيصال..."></textarea>
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span id="btnText">حفظ المعاملة وتوثيقها</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+        </form>
+    </div>
+
+ <script>
+        // 1. التوجيه (Routing) لكسر حاجز الـ Sandbox
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+        
+        function goHome() {
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Home`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Home`;
+            }
+        }
+
+        // 2. التهيئة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('date').valueAsDate = new Date();
+            loadEmployees();
+        });
+
+        // 3. دالة جلب أسماء العمال من الخادم
+        function loadEmployees() {
+            google.script.run
+                .withSuccessHandler(function(employees) {
+                    const select = document.getElementById('employeeName');
+                    select.innerHTML = '<option value="">-- اختر العامل --</option>';
+                    employees.forEach(function(emp) {
+                        select.innerHTML += '<option value="' + emp + '">' + emp + '</option>';
+                    });
+                })
+                .withFailureHandler(function(err) {
+                    console.error("خطأ في تحميل الأسماء: ", err);
+                    document.getElementById('employeeName').innerHTML = '<option value="">خطأ في تحميل الأسماء</option>';
+                })
+                .getEmployeesList();
+        }
+
+        // 4. معالجة الإرسال وإرسال البيانات للباك إند
+        document.getElementById('advancesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'جاري الحفظ والتسجيل...';
+            
+            const payload = {
+                date: document.getElementById('date').value,
+                employeeName: document.getElementById('employeeName').value,
+                transactionType: document.getElementById('transactionType').value,
+                amount: parseFloat(document.getElementById('amount').value) || 0,
+                notes: document.getElementById('notes').value.trim()
+            };
+            
+            console.log("البيانات المرسلة للخادم:", payload);
+            
+            // الاتصال الحقيقي بالخادم عبر google.script.run
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .processAdvanceTransaction(payload);
+        });
+
+        // 5. دالة النجاح (تُنفذ فور حفظ السلفة في الشيت وإلغاء الـ Loading)
+        function onSuccess(message) {
+            alert(message);
+            resetForm();
+        }
+
+        // 6. دالة الفشل
+        function onFailure(error) {
+            alert("حدث خطأ أثناء المعالجة: " + error);
+            resetForm();
+        }
+
+        // 7. تفريغ النموذج وإعادة الزر لحالته الطبيعية وإيقاف الـ Spinner
+        function resetForm() {
+            document.getElementById('advancesForm').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.textContent = 'حفظ المعاملة وتوثيقها';
+        }
+    </script>
+</body>
+</html>

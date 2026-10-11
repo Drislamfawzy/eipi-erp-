@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البوابة الرئيسية - EIPI Factory ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+        .header-container { max-width: 1200px; width: 100%; margin: 0 auto 30px auto; background: var(--card-bg); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 4px solid var(--accent); }
+        .brand-section h1 { font-size: 1.5rem; color: var(--primary); font-weight: 900; }
+        .brand-section p { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+        .user-meta { display: flex; align-items: center; gap: 10px; background: var(--bg-main); padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border-color); }
+        .user-meta i { color: var(--accent); }
+        .hub-grid { max-width: 1200px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding-bottom: 30px; }
+        .hub-card { background: var(--card-bg); border-radius: var(--radius); padding: 30px 20px; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; text-decoration: none; }
+        .hub-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 5px; background: var(--card-accent, var(--accent)); transition: height 0.2s ease; }
+        .hub-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--card-accent, var(--accent)); }
+        .hub-card:hover::before { height: 8px; }
+        .card-production { --card-accent: #2563eb; }
+        .card-dispatch { --card-accent: #d97706; }
+        .card-inbound { --card-accent: #16a34a; }
+        .card-dashboard { --card-accent: #7c3aed; }
+        .card-pettycash { --card-accent: #0284c7; }
+        /* لون مميز لكارت المرتبات */
+        .card-payroll { --card-accent: #059669; } 
+        .icon-box { width: 75px; height: 75px; border-radius: 20px; background: var(--bg-main); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--card-accent, var(--accent)); margin-bottom: 20px; transition: background 0.3s ease, color 0.3s ease; }
+        .hub-card:hover .icon-box { background: var(--card-accent, var(--accent)); color: #ffffff; }
+        .hub-card h3 { font-size: 1.25rem; color: var(--primary); font-weight: 700; margin-bottom: 8px; }
+        .hub-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+        .footer { text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 15px 0; border-top: 1px solid var(--border-color); max-width: 1200px; width: 100%; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <div class="brand-section">
+            <h1>EIPI Factory ERP</h1>
+            <p>نظام إدارة موارد المصنع - البوابة التشغيلية الرئيسية</p>
+        </div>
+        <div class="user-meta">
+            <i class="fa-solid fa-industry"></i>
+            <span>خطوط الإنتاج والتخزين</span>
+        </div>
+    </header>
+
+    <main class="hub-grid">
+        <div onclick="navigateTo('Index')" class="hub-card card-production">
+            <div class="icon-box"><i class="fa-solid fa-gears"></i></div>
+            <h3>تسجيل الإنتاج</h3>
+            <p>إدارة وتسجيل أوامر الإنتاج اليومية، خطوط الحقن والنفخ، ومتابعة الكميات المصنعة.</p>
+        </div>
+
+        <div onclick="navigateTo('Form_Dispatch')" class="hub-card card-dispatch">
+            <div class="icon-box"><i class="fa-solid fa-truck-ramp-loading"></i></div>
+            <h3>إذن خروج بضاعة</h3>
+            <p>إصدار ومتابعة أذونات تسليم المنتجات للعملاء وشحن الطلبيات الجاهزة.</p>
+        </div>
+
+        <div onclick="navigateTo('Form_Inbound')" class="hub-card card-inbound">
+            <div class="icon-box"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <h3>إذن استلام خامات</h3>
+            <p>تسجيل واردات الخامات (حبوب PET، عبوات، مستلزمات) وفحصها مخزنوياً.</p>
+        </div>
+
+        <div onclick="navigateTo('Dashboard')" class="hub-card card-dashboard">
+            <div class="icon-box"><i class="fa-solid fa-chart-pie"></i></div>
+            <h3>لوحة القيادة التنفيذية</h3>
+            <p>مؤشرات الأداء اللحظية، تقارير الإنتاج، حركة المخزون، وتحليلات التشغيل.</p>
+        </div>
+
+        <div onclick="navigateTo('Form_PettyCash')" class="hub-card card-pettycash">
+            <div class="icon-box"><i class="fa-solid fa-wallet"></i></div>
+            <h3>تسجيل العهدة</h3>
+            <p>إدارة المصروفات التشغيلية وحركات النقدية (وارد/صادر) للمصنع.</p>
+        </div>
+
+        <!-- الكارت الجديد الخاص بالمرتبات -->
+        <div onclick="navigateTo('Form_Payroll')" class="hub-card card-payroll">
+            <div class="icon-box"><i class="fa-solid fa-users-gear"></i></div>
+            <h3>المرتبات والأجور</h3>
+            <p>إدارة حضور وانصراف العمال، وحساب الأجور والخصومات أوتوماتيكياً.</p>
+        </div>
+        <!-- كارت تسجيل السلف والمعاملات الجديد -->
+        <div onclick="navigateTo('Form_Advances')" class="hub-card card-advances">
+            <div class="icon-box"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <h3>تسجيل السلف</h3>
+            <p>إدارة وصرف سلف العمال، وتسجيل المعاملات المالية المرتبطة بالرواتب.</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>EIPI Factory ERP &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+
+        function navigateTo(viewName) {
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=${viewName}`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=${viewName}`;
+            }
+        }
+    </script>
+</body>
+</html>

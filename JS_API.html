@@ -1,0 +1,139 @@
+<script>
+    // تعيين تاريخ اليوم كقيمة افتراضية عند تحميل الصفحة
+    document.addEventListener("DOMContentLoaded", function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("eventDate").value = today;
+    });
+
+    // دالة لإظهار/إخفاء الأقسام الاختيارية (Progressive Disclosure)
+    function toggleSection(sectionId, checkbox) {
+        const section = document.getElementById(sectionId);
+        if (checkbox.checked) {
+            section.style.display = "block";
+        } else {
+            section.style.display = "none";
+            // اختياري: تفريغ الحقول عند الإخفاء لتجنب إرسال بيانات خاطئة
+            const inputs = section.querySelectorAll('input, select');
+            inputs.forEach(input => input.value = '');
+        }
+    }
+
+    // دالة لإضافة سطر إنتاج جديد (لماكينة أخرى)
+    function addProductionLine() {
+        const container = document.getElementById("productionLinesContainer");
+        // استنساخ أول سطر إنتاج
+        const firstLine = container.querySelector(".production-line");
+        const newLine = firstLine.cloneNode(true);
+        
+        // تفريغ القيم في السطر الجديد
+        const inputs = newLine.querySelectorAll('input, select');
+        inputs.forEach(input => input.value = '');
+        
+        container.appendChild(newLine);
+    }
+
+    // الدالة الرئيسية لإرسال النموذج
+    function submitProduction(event) {
+        // منع إعادة تحميل الصفحة الافتراضي
+        event.preventDefault();
+
+        const submitBtn = document.getElementById("submitBtn");
+        const statusDiv = document.getElementById("statusMessage");
+
+        // 1. حماية التزامن (Concurrency Protection - Client Side)
+        submitBtn.disabled = true;
+        submitBtn.innerText = "جاري الحفظ... الرجاء الانتظار";
+        statusDiv.style.display = "none";
+        statusDiv.className = "status-message";
+
+        // 2. تجميع البيانات (Build Payload)
+        const payload = {
+            header: {
+                Event_Date: document.getElementById("eventDate").value,
+                Shift_ID: document.getElementById("shiftId").value
+            },
+            lines: [],
+            scrap: null,
+            downtime: null,
+            utility: null
+        };
+
+        // تجميع سطور الإنتاج (Multiple Machines)
+        const productionLines = document.querySelectorAll(".production-line");
+        productionLines.forEach(line => {
+            const machineId = line.querySelector(".machineId").value;
+            const itemId = line.querySelector(".itemId").value;
+            const qty = line.querySelector(".producedQty").value;
+            
+            if(machineId && itemId && qty) {
+                payload.lines.push({
+                    Machine_ID: machineId,
+                    Item_ID: itemId,
+                    Produced_Qty: parseFloat(qty)
+                });
+            }
+        });
+
+        // تجميع الهالك إن وجد
+        if (document.getElementById("hasScrap").checked) {
+            payload.scrap = {
+                Quantity: parseFloat(document.getElementById("scrapQty").value) || 0,
+                ScrapRsn_ID: document.getElementById("scrapReason").value
+            };
+        }
+
+        // تجميع التوقفات إن وجدت
+        if (document.getElementById("hasDowntime").checked) {
+            payload.downtime = {
+                Machine_ID: document.getElementById("downMachineId").value,
+                Start_Time: document.getElementById("downStart").value,
+                End_Time: document.getElementById("downEnd").value
+            };
+        }
+
+        // تجميع المرافق إن وجدت
+        const elecReading = document.getElementById("elecReading").value;
+        if (elecReading !== "") {
+            payload.utility = {
+                Meter_Type: "Electricity",
+                Current_Read: parseFloat(elecReading)
+            };
+        }
+
+        // 3. إرسال البيانات للـ Backend عبر Google Apps Script API
+        google.script.run
+            .withSuccessHandler(function(response) {
+                // النجاح
+                statusDiv.innerText = "تم حفظ الوردية بنجاح! رقم الحركة: " + response.transactionId;
+                statusDiv.classList.add("status-success");
+                
+                // تفريغ النموذج وإعادة تهيئة الشاشة
+                document.getElementById("productionForm").reset();
+                document.getElementById("eventDate").value = new Date().toISOString().split('T')[0];
+                
+                // إخفاء الأقسام الاختيارية
+                document.getElementById("scrapSection").style.display = "none";
+                document.getElementById("downtimeSection").style.display = "none";
+                
+                // إزالة الأسطر الإضافية للإنتاج (ترك سطر واحد فقط)
+                const container = document.getElementById("productionLinesContainer");
+                while (container.children.length > 1) {
+                    container.removeChild(container.lastChild);
+                }
+
+                // تفعيل الزر مجدداً
+                submitBtn.disabled = false;
+                submitBtn.innerText = "إرسال واعتماد الوردية";
+            })
+            .withFailureHandler(function(error) {
+                // الفشل
+                statusDiv.innerText = "خطأ: " + error.message;
+                statusDiv.classList.add("status-error");
+                
+                // تفعيل الزر مجدداً ليتيح للمستخدم المحاولة مرة أخرى
+                submitBtn.disabled = false;
+                submitBtn.innerText = "إرسال واعتماد الوردية";
+            })
+            .api_saveProductionShift(payload);
+    }
+</script>

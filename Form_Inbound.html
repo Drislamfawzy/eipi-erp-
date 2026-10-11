@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <header class="header-container" style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; border-bottom: 4px solid var(--accent);">
+    <div>
+        <h1 style="font-size: 1.35rem; color: #0f172a; font-weight: 900;">عنوان الصفحة الحالي</h1>
+        <p style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">وصف العملية التشغيلية</p>
+    </div>
+    <a href="#" onclick="goHome(event)" style="display: flex; align-items: center; gap: 8px; background: #f8fafc; color: #0f172a; padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; border: 1px solid #e2e8f0; text-decoration: none;">
+        <i class="fa-solid fa-house"></i>
+        <span>الرئيسية</span>
+    </a>
+</header>
+        <!-- باقي كود الشاشة... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إذن استلام خامات (Inbound) - EIPI ERP</title>
+    
+    <style>
+        /* التنسيقات العامة المتناسقة مع هوية التطبيق */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --border-color: #e5e7eb;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 2rem;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* تصميم البطاقات (Cards) */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* الحقول (Inputs) */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input[type="date"],
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background-color: #fafafa;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        /* أسطر الأصناف الواردة (Mobile Friendly Flexbox) */
+        .inbound-line {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border: 1px dashed var(--border-color);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            background-color: #f9fafb;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--error-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none; /* مخفي للسطر الأول الافتراضي */
+        }
+
+        /* الأزرار (Buttons) */
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: var(--text-main);
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+        /* رسائل الحالة */
+        .status-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--radius);
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status-success {
+            background-color: #d1fae5;
+            color: var(--success-color);
+            border: 1px solid #34d399;
+            display: block;
+        }
+
+        .status-error {
+            background-color: #fee2e2;
+            color: var(--error-color);
+            border: 1px solid #f87171;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <h1>إذن استلام خامات (Inbound)</h1>
+        </header>
+
+        <form id="inboundForm" onsubmit="submitInbound(event)">
+            
+            <!-- Header Section -->
+            <div class="card">
+                <div class="card-title">بيانات الاستلام</div>
+                
+                <div class="form-group">
+                    <label for="partnerId">المورد</label>
+                    <select id="partnerId" required>
+                        <option value="" disabled selected>اختر المورد...</option>
+                        <option value="PTN-0050">شركة البلاستيك الحديثة (مورد خامات)</option>
+                        <option value="PTN-0051">مجموعة التعبئة الدولية</option>
+                        <!-- يتم جلب باقي الموردين ديناميكياً من الـ Backend -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="docRef">رقم إذن الاستلام الورقي / فاتورة المورد</label>
+                    <input type="text" id="docRef" placeholder="أدخل الرقم الورقي الإلزامي..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">التاريخ</label>
+                    <input type="date" id="eventDate" required>
+                </div>
+            </div>
+
+            <!-- Lines Section -->
+            <div class="card">
+                <div class="card-title">الأصناف الواردة</div>
+                
+                <div id="inboundLinesContainer">
+                    <!-- سطر صنف افتراضي أول -->
+                    <div class="inbound-line">
+                        <button type="button" class="remove-btn" onclick="removeLine(this)">&times;</button>
+                        <div class="form-group">
+                            <label>الصنف (خامات / بريفورم / أكياس)</label>
+                            <select class="itemId" required>
+                                <option value="" disabled selected>اختر الصنف الوارد...</option>
+                                <option value="ITM-0100">حبوب بيتي إتش دي (HDPE)</option>
+                                <option value="ITM-0101">بريفورم جاهز 24 جرام</option>
+                                <option value="ITM-0102">أكياس تعبئة بلاستيك</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية المستلمة</label>
+                            <input type="number" class="inboundQty" min="1" step="any" placeholder="مثال: 5000" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn-secondary" onclick="addInboundLine()">+ إضافة صنف وارد آخر</button>
+            </div>
+
+            <!-- Action Section -->
+            <button type="submit" id="submitBtn" class="btn-primary">تأكيد واستلام الخامات</button>
+            <div id="statusMessage" class="status-message"></div>
+
+        </form>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // تعيين تاريخ اليوم كقيمة افتراضية عند تحميل الصفحة
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("eventDate").value = today;
+        });
+
+        // إضافة سطر صنف جديد
+        function addInboundLine() {
+            const container = document.getElementById("inboundLinesContainer");
+            const firstLine = container.querySelector(".inbound-line");
+            const newLine = firstLine.cloneNode(true);
+            
+            // تفريغ القيم في السطر الجديد
+            newLine.querySelector(".itemId").value = "";
+            newLine.querySelector(".inboundQty").value = "";
+            
+            // إظهار زر الحذف للسطر الجديد
+            newLine.querySelector(".remove-btn").style.display = "block";
+            
+            container.appendChild(newLine);
+        }
+
+        // حذف سطر صنف
+        function removeLine(btn) {
+            const line = btn.closest('.inbound-line');
+            line.remove();
+        }
+
+        // الدالة الرئيسية لإرسال النموذج وحماية الـ Double Submit
+        function submitInbound(event) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة
+
+            const submitBtn = document.getElementById("submitBtn");
+            const statusDiv = document.getElementById("statusMessage");
+
+            // 1. حماية التزامن وتعطيل الزر وإظهار حالة التحميل
+            submitBtn.disabled = true;
+            submitBtn.innerText = "جاري المعالجة... الرجاء الانتظار";
+            statusDiv.style.display = "none";
+            statusDiv.className = "status-message";
+
+            // 2. بناء هيكل الـ Payload المطلوب
+            const payload = {
+                partnerId: document.getElementById("partnerId").value,
+                date: document.getElementById("eventDate").value,
+                docRef: document.getElementById("docRef").value,
+                lines: []
+            };
+
+            // تجميع الأصناف والكميات الواردة
+            const lines = document.querySelectorAll(".inbound-line");
+            lines.forEach(line => {
+                const itemId = line.querySelector(".itemId").value;
+                const qty = line.querySelector(".inboundQty").value;
+                
+                if (itemId && qty) {
+                    payload.lines.push({
+                        itemId: itemId,
+                        qty: parseFloat(qty)
+                    });
+                }
+            });
+
+            if(payload.lines.length === 0) {
+                alert("يجب إضافة صنف واحد على الأقل للاستلام.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "تأكيد واستلام الخامات";
+                return;
+            }
+
+            // 3. إرسال البيانات للـ Backend عبر Google Apps Script API
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    // قراءة رقم الإذن من response.data.eventId كما طلبت
+                    const eventId = (response && response.data && response.data.eventId) ? response.data.eventId : "مؤكد";
+                    
+                    statusDiv.innerText = "تم استلام الخامات بنجاح! رقم الإذن: " + eventId;
+                    statusDiv.classList.add("status-success");
+                    
+                    // إعادة تهيئة النموذج بالكامل
+                    document.getElementById("inboundForm").reset();
+                    document.getElementById("eventDate").value = new Date().toISOString().split('T')[0];
+                    
+                    // حذف كل الأسطر الإضافية وترك الأول فقط
+                    const container = document.getElementById("inboundLinesContainer");
+                    while (container.children.length > 1) {
+                        container.removeChild(container.lastChild);
+                    }
+
+                    // إعادة تفعيل الزر
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "تأكيد واستلام الخامات";
+                })
+                .withFailureHandler(function(error) {
+                    statusDiv.innerText = "خطأ في المعالجة: " + error.message;
+                    statusDiv.classList.add("status-error");
+                    
+                    // إعادة تفعيل الزر لتمكين المستخدم من إعادة المحاولة
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "تأكيد واستلام الخامات";
+                })
+                .api_saveInbound(payload);
+        }
+    </script>
+    <script>
+    function goHome(event) {
+        event.preventDefault();
+        // إذا كان BASE_URL معرفاً، انتقل إليه، وإلا اقطع الرابط للوصول للرئيسية
+        const base = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : window.location.href.split('?')[0];
+        window.top.location.href = base;
+    }
+    const BASE_URL = "<?= scriptUrl ?>";
+
+function goHome(e) {
+    e.preventDefault();
+    if (BASE_URL && BASE_URL.startsWith('http')) {
+        window.top.location.href = `${BASE_URL}?page=Home`;
+    } else {
+        const current = window.location.href.split('?')[0];
+        window.top.location.href = `${current}?page=Home`;
+    }
+}
+
+function addInboundRow() {
+    const tbody = document.getElementById('inboundTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="text" class="form-control" placeholder="مثال: حبيبات PET عذراء" required></td>
+        <td><input type="number" class="form-control" placeholder="الكمية / الوزن" required min="1"></td>
+        <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeInboundRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+    `;
+    tbody.appendChild(newRow);
+}
+
+function removeInboundRow(btn) {
+    const tbody = document.getElementById('inboundTableBody');
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+    } else {
+        alert('يجب تسجيل خامة واحدة على الأقل في الإذن.');
+    }
+}
+
+function submitInbound(e) {
+    e.preventDefault();
+    const submitBtn = document.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+
+    const supplierName = document.getElementById('supplierName').value;
+    
+    const items = [];
+    const rows = document.querySelectorAll('#inboundTableBody tr');
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        items.push({
+            materialName: inputs[0].value,
+            quantity: Number(inputs[1].value)
+        });
+    });
+
+    const payload = {
+        supplierName: supplierName,
+        items: items
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري استلام وتسجيل الخامات...';
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            alert('تم استلام الخامات وتسجيلها بالمخزن بنجاح!');
+            document.getElementById('inboundForm').reset();
+            
+            document.getElementById('inboundTableBody').innerHTML = `
+                <tr>
+                    <td><input type="text" class="form-control" placeholder="مثال: حبيبات PET عذراء" required></td>
+                    <td><input type="number" class="form-control" placeholder="الكمية / الوزن" required min="1"></td>
+                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeInboundRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `;
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .withFailureHandler(function(error) {
+            alert('حدث خطأ أثناء الاستلام: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .saveInboundData(payload); // دالة الـ Backend المستقبلية للاستلام
+}
+</script>
+</body>
+</html>

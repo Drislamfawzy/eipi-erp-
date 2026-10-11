@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل بيانات المرتبات</title>
+    <!-- استدعاء خط Cairo وأيقونات FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            color: var(--text);
+        }
+
+        /* الرأس Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* الكارت والنموذج */
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* الموبايل: عمود واحد */
+            gap: 15px;
+        }
+
+        /* الشاشات الكبيرة: عمودين */
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], input[type="date"], select {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        /* الـ Toggle Radio */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            height: 100%;
+            padding: 10px 0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        /* زر الحفظ والـ Spinner */
+        .submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2><i class="fa-solid fa-users-gear"></i> تسجيل بيانات المرتبات</h2>
+        <button class="back-btn" onclick="goHome()">
+            <i class="fa-solid fa-arrow-right"></i> الرجوع للرئيسية
+        </button>
+    </div>
+
+    <div class="card">
+        <form id="payrollForm">
+            <div class="form-grid">
+                
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>اسم العامل</label>
+                    <select id="employeeName" required>
+                        <option value="">جاري تحميل الأسماء...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>ساعات العمل الأساسية</label>
+                    <select id="baseHours" required>
+                        <option value="9">9 ساعات</option>
+                        <option value="12">12 ساعة</option>
+                        <option value="24">24 ساعة</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>أيام الحضور</label>
+                    <input type="number" id="attendanceDays" min="0" step="0.5" required>
+                </div>
+
+                <div class="form-group">
+                    <label>غياب بدون إذن (أيام)</label>
+                    <input type="number" id="unexcusedAbsence" value="0" min="0" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label>ساعات التأخير</label>
+                    <input type="number" id="delayHours" value="0" min="0" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label>ساعات الأوفر تايم</label>
+                    <input type="number" id="overtimeHours" value="0" min="0" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label>خصومات وجزاءات (ج.م)</label>
+                    <input type="number" id="deductions" value="0" min="0" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label>السلف (ج.م)</label>
+                    <input type="number" id="advances" value="0" min="0" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label>حوافز (ج.م)</label>
+                    <input type="number" id="incentives" value="0" min="0" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label>مكافأة إنتاج</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="productionBonus" value="لا" checked> لا</label>
+                        <label><input type="radio" name="productionBonus" value="نعم"> نعم</label>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span id="btnText">احسب وسجل المرتب</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 1. التوجيه (Routing)
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+        
+        function goHome() {
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Home`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Home`;
+            }
+        }
+
+        // 2. التهيئة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('date').valueAsDate = new Date();
+            loadEmployees();
+        });
+
+        // 3. دالة جلب أسماء العمال من الخادم
+        function loadEmployees() {
+            google.script.run.withSuccessHandler(function(employees) {
+                const select = document.getElementById('employeeName');
+                select.innerHTML = '<option value="">-- اختر العامل --</option>';
+                employees.forEach(function(emp) {
+                    select.innerHTML += '<option value="' + emp + '">' + emp + '</option>';
+                });
+            }).getEmployeesList();
+        }
+
+        // 4. تجميع البيانات والـ Submit
+        document.getElementById('payrollForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'جاري التسجيل...';
+            
+            const payload = {
+                date: document.getElementById('date').value,
+                employeeName: document.getElementById('employeeName').value,
+                baseHours: document.getElementById('baseHours').value,
+                attendanceDays: document.getElementById('attendanceDays').value,
+                unexcusedAbsence: document.getElementById('unexcusedAbsence').value,
+                delayHours: document.getElementById('delayHours').value,
+                overtimeHours: document.getElementById('overtimeHours').value,
+                deductions: document.getElementById('deductions').value,
+                advances: document.getElementById('advances').value,
+                incentives: document.getElementById('incentives').value,
+                productionBonus: document.querySelector('input[name="productionBonus"]:checked').value
+            };
+            
+            // الاتصال الحقيقي بالخادم (Backend)
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .processPayroll(payload);
+        });
+
+        // 5. دوال الرد من الخادم (Success / Failure)
+        function onSuccess(message) {
+            alert(message);
+            resetForm();
+        }
+
+        function onFailure(error) {
+            alert("حصل مشكلة في التسجيل: " + error);
+            resetForm();
+        }
+
+        // 6. تفريغ النموذج وإعادته لحالته الأصلية
+        function resetForm() {
+            document.getElementById('payrollForm').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.textContent = 'احسب وسجل المرتب';
+            
+            // تحميل الأسماء مرة أخرى وتفريغ الاختيار
+            loadEmployees();
+        }
+    </script>
+</body>
+</html>

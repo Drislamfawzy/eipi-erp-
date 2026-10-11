@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إذن خروج بضاعة - EIPI Factory ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #d97706;
+            --accent-hover: #b45309;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+        
+        .header-container { max-width: 1000px; width: 100%; margin: 0 auto 20px auto; background: var(--card-bg); padding: 20px 24px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 4px solid var(--accent); }
+        .brand-section h1 { font-size: 1.35rem; color: var(--primary); font-weight: 900; }
+        .brand-section p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        
+        .nav-home-btn { display: flex; align-items: center; gap: 8px; background: var(--bg-main); color: var(--primary); padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s ease; }
+        .nav-home-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .form-card { max-width: 1000px; width: 100%; margin: 0 auto; background: var(--card-bg); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+        .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-main); color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .form-control:focus { border-color: var(--accent); background: #fff; }
+
+        /* جدول المنتجات المتعددة */
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .items-table th, .items-table td { padding: 10px; border: 1px solid var(--border-color); text-align: right; }
+        .items-table th { background: var(--bg-main); color: var(--primary); font-weight: 700; }
+        
+        .btn-add-row { background: var(--success); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; transition: background 0.2s; }
+        .btn-add-row:hover { background: #15803d; }
+        
+        .btn-delete-row { background: var(--danger); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        .btn-delete-row:hover { background: #b91c1c; }
+
+        .btn-submit { background: var(--accent); color: #fff; border: none; width: 100%; padding: 14px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+        .btn-submit:hover { background: var(--accent-hover); }
+
+        .footer { text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 15px 0; border-top: 1px solid var(--border-color); max-width: 1000px; width: 100%; margin: 20px auto 0 auto; }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <div class="brand-section">
+            <h1>إذن خروج بضاعة (Dispatch)</h1>
+            <p>تسجيل وإصدار أذونات الشحن وتسليم المنتجات للعملاء</p>
+        </div>
+        <a href="#" onclick="goHome(event)" class="nav-home-btn">
+            <i class="fa-solid fa-house"></i>
+            <span>الرئيسية</span>
+        </a>
+    </header>
+
+    <main class="form-card">
+        <form id="dispatchForm" onsubmit="submitDispatch(event)">
+            <div class="form-group">
+                <label for="clientName">اسم العميل / الجهة:</label>
+                <input type="text" id="clientName" class="form-control" required placeholder="أدخل اسم العميل أو المشتري">
+            </div>
+
+            <div class="form-group">
+                <label>أصناف وبنود البضاعة المنصرفة:</label>
+                <table class="items-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>الصنف / المنتج</th>
+                            <th style="width: 150px;">الكمية</th>
+                            <th style="width: 80px; text-align: center;">حذف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <tr>
+                            <td><input type="text" class="form-control" placeholder="مثال: عبوات 500 مل سادة" required></td>
+                            <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
+                            <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn-add-row" onclick="addRow()">
+                    <i class="fa-solid fa-plus"></i> إضافة صنف آخر (+)
+                </button>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-truck-ramp-loading"></i> حفظ واصدار إذن خروج البضاعة
+            </button>
+        </form>
+    </main>
+
+    <footer class="footer">
+        <p>EIPI Factory ERP &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const BASE_URL = "<?= scriptUrl ?>";
+
+        function goHome(e) {
+            e.preventDefault();
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Home`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Home`;
+            }
+        }
+
+        function addRow() {
+            const tbody = document.getElementById('itemsTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="form-control" placeholder="مثال: غطاء أزرق مارينا" required></td>
+                <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
+                <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeRow(btn) {
+            const tbody = document.getElementById('itemsTableBody');
+            if (tbody.rows.length > 1) {
+                btn.closest('tr').remove();
+            } else {
+                alert('يجب أن يحتوي الإذن على صنف واحد على الأقل.');
+            }
+        }
+
+        function submitDispatch(e) {
+            e.preventDefault();
+            alert('تم تسجيل إذن خروج البضاعة للأصناف المتعددة بنجاح!');
+        }
+        const BASE_URL = "<?= scriptUrl ?>";
+
+function goHome(e) {
+    e.preventDefault();
+    if (BASE_URL && BASE_URL.startsWith('http')) {
+        window.top.location.href = `${BASE_URL}?page=Home`;
+    } else {
+        const current = window.location.href.split('?')[0];
+        window.top.location.href = `${current}?page=Home`;
+    }
+}
+
+// إضافة صنف جديد لجدول أذونات الصرف
+function addRow() {
+    const tbody = document.getElementById('itemsTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="text" class="form-control" placeholder="مثال: غطاء أزرق مارينا" required></td>
+        <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
+        <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+    `;
+    tbody.appendChild(newRow);
+}
+
+// حذف صنف من جدول الصرف
+function removeRow(btn) {
+    const tbody = document.getElementById('itemsTableBody');
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+    } else {
+        alert('يجب أن يحتوي إذن الخروج على صنف واحد على الأقل.');
+    }
+}
+
+// إرسال إذن الخروج عبر google.script.run
+function submitDispatch(e) {
+    e.preventDefault();
+    const submitBtn = document.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+
+    const clientName = document.getElementById('clientName').value;
+    
+    // جمع الأصناف المتعددة في جدول الصرف
+    const items = [];
+    const rows = document.querySelectorAll('#itemsTableBody tr');
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        items.push({
+            itemName: inputs[0].value,
+            quantity: Number(inputs[1].value)
+        });
+    });
+
+    const payload = {
+        clientName: clientName,
+        items: items
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إصدار إذن الخروج...';
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            alert('تم تسجيل وإصدار إذن خروج البضاعة بنجاح!');
+            document.getElementById('dispatchForm').reset();
+            
+            // إعادة ضبط الجدول
+            document.getElementById('itemsTableBody').innerHTML = `
+                <tr>
+                    <td><input type="text" class="form-control" placeholder="مثال: عبوات 500 مل سادة" required></td>
+                    <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
+                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `;
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .withFailureHandler(function(error) {
+            alert('حدث خطأ أثناء إصدار الإذن: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .saveDispatchData(payload); // دالة الـ Backend المستقبلية للخروج
+}
+    </script>
+</body>
+</html>

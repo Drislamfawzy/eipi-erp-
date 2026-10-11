@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل إنتاج الوردية - EIPI Factory ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+        
+        .header-container { max-width: 1100px; width: 100%; margin: 0 auto 20px auto; background: var(--card-bg); padding: 20px 24px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 4px solid var(--accent); }
+        .brand-section h1 { font-size: 1.35rem; color: var(--primary); font-weight: 900; }
+        .brand-section p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        
+        .nav-home-btn { display: flex; align-items: center; gap: 8px; background: var(--bg-main); color: var(--primary); padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s ease; }
+        .nav-home-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .form-card { max-width: 1100px; width: 100%; margin: 0 auto; background: var(--card-bg); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+        .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-main); color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .form-control:focus { border-color: var(--accent); background: #fff; }
+
+        /* قسم الماكينات الديناميكي */
+        .section-subtitle { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        .machines-table-wrapper { overflow-x: auto; margin-bottom: 15px; }
+        .machines-table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        .machines-table th, .machines-table td { padding: 10px; border: 1px solid var(--border-color); text-align: right; vertical-align: middle; }
+        .machines-table th { background: var(--bg-main); color: var(--primary); font-weight: 700; font-size: 0.95rem; }
+
+        .btn-add-row { background: var(--success); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; transition: background 0.2s; }
+        .btn-add-row:hover { background: #15803d; }
+        
+        .btn-delete-row { background: var(--danger); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .btn-delete-row:hover { background: #b91c1c; }
+
+        .form-group.full-width { margin-top: 15px; }
+        
+        .btn-submit { background: var(--accent); color: #fff; border: none; width: 100%; padding: 14px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        .btn-submit:hover { background: var(--accent-hover); }
+
+        .footer { text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 15px 0; border-top: 1px solid var(--border-color); max-width: 1100px; width: 100%; margin: 20px auto 0 auto; }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <div class="brand-section">
+            <h1>تسجيل إنتاج الوردية (Production)</h1>
+            <p>إدارة وتسجيل أوامر الإنتاج لعدة ماكينات بالتوازي</p>
+        </div>
+        <a href="#" onclick="goHome(event)" class="nav-home-btn">
+            <i class="fa-solid fa-house"></i>
+            <span>الرئيسية</span>
+        </a>
+    </header>
+
+    <main class="form-card">
+        <form id="productionForm" onsubmit="submitProduction(event)">
+            
+            <!-- معلومات الوردية الأساسية -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="shiftDate">تاريخ الوردية:</label>
+                    <input type="date" id="shiftDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="shiftType">نوع الوردية:</label>
+                    <select id="shiftType" class="form-control" required>
+                        <option value="">اختر الوردية</option>
+                        <option value="صباحية">وردية صباحية</option>
+                        <option value="مسائية">وردية مسائية</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- جدول تفاصيل الإنتاج للماكينات المتعددة -->
+            <div class="form-group">
+                <div class="section-subtitle">
+                    <i class="fa-solid fa-gears" style="color: var(--accent);"></i>
+                    <span>تفاصيل إنتاج الماكينات في الوردية</span>
+                </div>
+                
+                <div class="machines-table-wrapper">
+                    <table class="machines-table" id="machinesTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 200px;">الماكينة / الخط</th>
+                                <th>الصنف المُنتَج</th>
+                                <th style="width: 140px;">الكمية المصنعة</th>
+                                <th style="width: 130px;">الهالك (كجم)</th>
+                                <th style="width: 70px; text-align: center;">حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="machinesTableBody">
+                            <tr>
+                                <td>
+                                    <select class="form-control" required>
+                                        <option value="">اختر الماكينة</option>
+                                        <option value="خط حقن 1">خط حقن (1)</option>
+                                        <option value="خط حقن 2">خط حقن (2)</option>
+                                        <option value="خط نفخ 1">خط نفخ (1)</option>
+                                        <option value="خط نفخ 2">خط نفخ (2)</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" placeholder="العدد" required min="1">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
+                                </td>
+                                <td style="text-align: center;">
+                                    <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn-add-row" onclick="addMachineRow()">
+                    <i class="fa-solid fa-plus"></i> إضافة ماكينة أخرى (+)
+                </button>
+            </div>
+
+            <!-- ملاحظات الوردية العامة -->
+            <div class="form-group full-width">
+                <label for="notes">ملاحظات التشغيل العامة:</label>
+                <textarea id="notes" class="form-control" rows="3" placeholder="ملاحظات عامة حول الأعطال أو توقفات الخطوط إن وجدت"></textarea>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i> حفظ وترحيل بيانات الوردية لجميع الماكينات
+            </button>
+        </form>
+    </main>
+
+    <footer class="footer">
+        <p>EIPI Factory ERP &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const BASE_URL = "<?= scriptUrl ?>";
+
+        function goHome(e) {
+            e.preventDefault();
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Home`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Home`;
+            }
+        }
+
+        function addMachineRow() {
+            const tbody = document.getElementById('machinesTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-control" required>
+                        <option value="">اختر الماكينة</option>
+                        <option value="خط حقن 1">خط حقن (1)</option>
+                        <option value="خط حقن 2">خط حقن (2)</option>
+                        <option value="خط نفخ 1">خط نفخ (1)</option>
+                        <option value="خط نفخ 2">خط نفخ (2)</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="مثال: غطاء أزرق" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="العدد" required min="1">
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeMachineRow(btn) {
+            const tbody = document.getElementById('machinesTableBody');
+            if (tbody.rows.length > 1) {
+                btn.closest('tr').remove();
+            } else {
+                alert('يجب تسجيل بيانات ماكينة واحدة على الأقل في الوردية.');
+            }
+        }
+
+        function submitProduction(e) {
+            e.preventDefault();
+            alert('تم تسجيل وترحيل بيانات الإنتاج لجميع الماكينات بنجاح!');
+        }
+        const BASE_URL = "<?= scriptUrl ?>";
+
+function goHome(e) {
+    e.preventDefault();
+    if (BASE_URL && BASE_URL.startsWith('http')) {
+        window.top.location.href = `${BASE_URL}?page=Home`;
+    } else {
+        const current = window.location.href.split('?')[0];
+        window.top.location.href = `${current}?page=Home`;
+    }
+}
+
+// إضافة صف ماكينة جديد للجدول الديناميكي
+function addMachineRow() {
+    const tbody = document.getElementById('machinesTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>
+            <select class="form-control" required>
+                <option value="">اختر الماكينة</option>
+                <option value="خط حقن 1">خط حقن (1)</option>
+                <option value="خط حقن 2">خط حقن (2)</option>
+                <option value="خط نفخ 1">خط نفخ (1)</option>
+                <option value="خط نفخ 2">خط نفخ (2)</option>
+            </select>
+        </td>
+        <td>
+            <input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required>
+        </td>
+        <td>
+            <input type="number" class="form-control" placeholder="العدد" required min="1">
+        </td>
+        <td>
+            <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    `;
+    tbody.appendChild(newRow);
+}
+
+// حذف صف ماكينة
+function removeMachineRow(btn) {
+    const tbody = document.getElementById('machinesTableBody');
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+    } else {
+        alert('يجب تسجيل بيانات ماكينة واحدة على الأقل في الوردية.');
+    }
+}
+
+// إرسال بيانات الإنتاج عبر google.script.run
+function submitProduction(e) {
+    e.preventDefault();
+    const submitBtn = document.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+
+    // جمع بيانات الوردية الأساسية
+    const shiftDate = document.getElementById('shiftDate').value;
+    const shiftType = document.getElementById('shiftType').value;
+    const notes = document.getElementById('notes').value;
+
+    // جمع بيانات جدول الماكينات الديناميكي
+    const machines = [];
+    const rows = document.querySelectorAll('#machinesTableBody tr');
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input, select');
+        machines.push({
+            machineName: inputs[0].value,
+            productName: inputs[1].value,
+            quantity: Number(inputs[2].value),
+            waste: Number(inputs[3].value)
+        });
+    });
+
+    const payload = {
+        shiftDate: shiftDate,
+        shiftType: shiftType,
+        notes: notes,
+        machines: machines
+    };
+
+    // تفعيل مؤشر التحميل
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري حفظ وت رحيل بيانات الوردية...';
+
+    // الربط مع الـ Backend
+    google.script.run
+        .withSuccessHandler(function(response) {
+            alert('تم حفظ وترحيل بيانات الإنتاج لجميع الماكينات بنجاح!');
+            document.getElementById('productionForm').reset();
+            
+            // إعادة ضبط الجدول لصف افتراضي واحد
+            document.getElementById('machinesTableBody').innerHTML = `
+                <tr>
+                    <td>
+                        <select class="form-control" required>
+                            <option value="">اختر الماكينة</option>
+                            <option value="خط حقن 1">خط حقن (1)</option>
+                            <option value="خط حقن 2">خط حقن (2)</option>
+                            <option value="خط نفخ 1">خط نفخ (1)</option>
+                            <option value="خط نفخ 2">خط نفخ (2)</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required></td>
+                    <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
+                    <td><input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0"></td>
+                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `;
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .withFailureHandler(function(error) {
+            alert('حدث خطأ أثناء الحفظ: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .saveProductionData(payload); // دالة الـ Backend المستقبلية للإنتاج
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تسجيل حركة العهدة - EIPI Factory</title>
+    
+    <!-- خطوط جوجل (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #0056b3;
+            --primary-hover: #004494;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #dcdde1;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --focus-ring: rgba(0, 86, 179, 0.3);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .card-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-top: 10px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background-color: #eef2f5;
+            color: var(--primary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+            appearance: none;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .segmented-control {
+            display: flex;
+            width: 100%;
+            background-color: #eef2f5;
+            border-radius: var(--radius-md);
+            padding: 4px;
+            margin-bottom: 8px;
+        }
+
+        .segmented-control input[type="radio"] {
+            display: none;
+        }
+
+        .segment-label {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-radius: calc(var(--radius-md) - 2px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        #type_inbound:checked ~ label[for="type_inbound"] {
+            background-color: var(--success);
+            color: white;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+        }
+
+        #type_outbound:checked ~ label[for="type_outbound"] {
+            background-color: var(--danger);
+            color: white;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-submit:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 14px;
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container">
+        <div class="header">
+            <button onclick="goHome()" class="btn-back" type="button">
+                <i class="fa-solid fa-arrow-right"></i>
+                الرئيسية
+            </button>
+            <h2><i class="fa-solid fa-wallet"></i> العهدة</h2>
+        </div>
+
+        <form id="pettyCashForm">
+            
+            <div class="form-group">
+                <label for="transDate" class="form-label">تاريخ الحركة</label>
+                <input type="date" id="transDate" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">نوع الحركة</label>
+                <div class="segmented-control">
+                    <input type="radio" name="transType" id="type_outbound" value="صادر" checked>
+                    <label class="segment-label" for="type_outbound">صادر (خصم)</label>
+                    
+                    <input type="radio" name="transType" id="type_inbound" value="وارد">
+                    <label class="segment-label" for="type_inbound">وارد (إضافة)</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="categorySelect" class="form-label">بند الحركة</label>
+                <select id="categorySelect" class="form-control" required>
+                    <!-- سيتم تعبئتها بواسطة الجافاسكربت -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="amount" class="form-label">المبلغ (ج.م)</label>
+                <input type="number" id="amount" class="form-control" min="0" step="0.01" placeholder="أدخل المبلغ هنا..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="notes" class="form-label">البيان / ملاحظات</label>
+                <textarea id="notes" class="form-control" placeholder="اكتب تفاصيل الحركة أو اسم المستلم..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-submit">
+                <span id="submitText">حفظ الحركة</span>
+                <div class="spinner" id="spinnerIcon"></div>
+            </button>
+
+            <div id="statusMsg" class="alert"></div>
+
+        </form>
+    </div>
+
+    <script>
+        // دالة الرجوع للرئيسية
+        const BASE_URL = "<?= scriptUrl ?>";
+        function goHome() {
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = BASE_URL + '?page=Home';
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = current + '?page=Home';
+            }
+        }
+
+        // قواعد البيانات للبنود الديناميكية
+        const CATEGORIES = {
+            'وارد': [
+                "وارد د. إسلام", 
+                "وارد من بيع بضاعة", 
+                "وارد من بيع بالتات خشب", 
+                "وارد من بيع كرتون", 
+                "وارد متنوع"
+            ],
+            'صادر': [
+                "شراء قطع غيار", 
+                "إكراميات", 
+                "صيانات أو مخرطة", 
+                "مصروف كلارك", 
+                "مرتبات", 
+                "سلف", 
+                "أوفرتايم", 
+                "فاتورة مياه", 
+                "شحن كهرباء", 
+                "مستلزمات إنتاج", 
+                "متنوع", 
+                "أجر يوميات"
+            ]
+        };
+
+        const form = document.getElementById('pettyCashForm');
+        const transDate = document.getElementById('transDate');
+        const radios = document.querySelectorAll('input[name="transType"]');
+        const categorySelect = document.getElementById('categorySelect');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const spinnerIcon = document.getElementById('spinnerIcon');
+        const statusMsg = document.getElementById('statusMsg');
+
+        // تعيين تاريخ اليوم كافتراضي
+        function setTodayDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            transDate.value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // تحديث قائمة البنود
+        function updateCategoryDropdown() {
+            categorySelect.innerHTML = '<option value="" disabled selected>-- اختر البند --</option>';
+            const selectedType = document.querySelector('input[name="transType"]:checked').value;
+            const options = CATEGORIES[selectedType];
+
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt;
+                el.textContent = opt;
+                categorySelect.appendChild(el);
+            });
+        }
+
+        // عرض رسائل النظام
+        function showMessage(msg, isError = false) {
+            statusMsg.textContent = msg;
+            statusMsg.className = `alert ${isError ? 'alert-error' : 'alert-success'}`;
+            statusMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', updateCategoryDropdown);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTodayDate();
+            updateCategoryDropdown();
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // تفعيل حالة التحميل (UX Lock)
+            submitBtn.disabled = true;
+            submitText.textContent = "جاري الحفظ...";
+            spinnerIcon.style.display = 'block';
+            statusMsg.style.display = 'none';
+
+            const payload = {
+                date: transDate.value,
+                type: document.querySelector('input[name="transType"]:checked').value,
+                category: categorySelect.value,
+                amount: parseFloat(document.getElementById('amount').value),
+                notes: document.getElementById('notes').value
+            };
+
+            // الاتصال الفعلي بالخادم (Backend)
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .savePettyCashTransaction(payload);
+        });
+
+        function onSuccess(responseMessage) {
+            submitBtn.disabled = false;
+            submitText.textContent = "حفظ الحركة";
+            spinnerIcon.style.display = 'none';
+            showMessage(responseMessage, false);
+            
+            form.reset();
+            setTodayDate();
+            document.getElementById('type_outbound').checked = true;
+            updateCategoryDropdown();
+        }
+
+        function onFailure(errorMessage) {
+            submitBtn.disabled = false;
+            submitText.textContent = "حفظ الحركة";
+            spinnerIcon.style.display = 'none';
+            showMessage(errorMessage, true);
+        }
+    </script>
+</body>
+</html>
