@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الجرد الفعلي - EIPI Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #0f172a; --accent: #16a34a; --bg-main: #f8fafc; --card-bg: #ffffff; --border-color: #e2e8f0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-main); padding: 20px; }
+        .header { max-width: 800px; margin: 0 auto 20px; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 4px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 20px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .item-name { font-weight: 700; color: var(--primary); }
+        .item-input { width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center; font-weight: bold; }
+        .btn-submit { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 25px; transition: background 0.3s; }
+        .btn-submit:hover { background: #15803d; }
+        .category-title { grid-column: 1 / -1; background: var(--primary); color: white; padding: 8px 15px; border-radius: 6px; margin-top: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h2 style="color: var(--primary);"><i class="fa-solid fa-clipboard-check"></i> تسجيل الجرد الفعلي</h2>
+        </div>
+        <button onclick="goHome()" style="background: none; border: 1px solid var(--primary); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;">عودة للرئيسية</button>
+    </div>
+
+    <div class="container">
+        <div class="form-group">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">تاريخ الجرد:</label>
+            <input type="date" id="inventoryDate" class="form-control">
+        </div>
+
+        <form id="inventoryForm" onsubmit="submitInventory(event)">
+            <div class="inventory-grid" id="itemsContainer">
+                <!-- سيتم تعبئة الأصناف هنا عبر الجافاسكريبت لتنظيمها -->
+            </div>
+            
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="fa-solid fa-save"></i> حفظ وتحديث المخزون
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+        
+        // القائمة المعتمدة للجرد (تم دمج البند وإزالة التكرار)
+        const inventoryItems = [
+            { category: "البريفورم", items: ["بريفورم 29", "بريفورم 24", "بريفورم 20", "بريفورم مصنعيه"] },
+            { category: "العبوات", items: ["عبوات 500", "عبوات 750", "عبوات 850 مشرشر", "عبوات 900", "عبوات لتر 29", "عبوات لتر 20 جرام", "عبوات مصنعيه"] },
+            { category: "الأغطية", items: ["غطاء أزرق مارينا", "غطاء أزرق شكاير", "غطاء لبنى", "غطاء اصفر", "غطاء احمر", "غطاء اخضر"] },
+            { category: "مستلزمات التعبئة والتغليف", items: ["أكياس", "أكياس خارجي", " كراتين سكوتش"] }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inventoryDate').valueAsDate = new Date();
+            renderItems();
+        });
+
+        function renderItems() {
+            const container = document.getElementById('itemsContainer');
+            inventoryItems.forEach(group => {
+                container.innerHTML += `<div class="category-title"><i class="fa-solid fa-layer-group"></i> ${group.category}</div>`;
+                group.items.forEach(item => {
+                    container.innerHTML += `
+                        <div class="item-row">
+                            <span class="item-name">${item}</span>
+                            <input type="number" class="item-input inv-val" data-name="${item}" placeholder="العدد الفعلي" min="0">
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function goHome() {
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Home`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Home`;
+            }
+        }
+
+        function submitInventory(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const date = document.getElementById('inventoryDate').value;
+            const inputs = document.querySelectorAll('.inv-val');
+            
+            let dataToSave = [];
+            inputs.forEach(input => {
+                if(input.value !== "") {
+                    dataToSave.push({ itemName: input.getAttribute('data-name'), quantity: Number(input.value) });
+                }
+            });
+
+            if(dataToSave.length === 0) {
+                alert("برجاء إدخال كمية لصنف واحد على الأقل قبل الحفظ.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تحديث المخزون...';
+
+            const payload = { date: date, items: dataToSave };
+
+            google.script.run
+                .withSuccessHandler(() => {
+                    alert('تم تحديث الجرد الفعلي للمخزون بنجاح!');
+                    document.getElementById('inventoryForm').reset();
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-save"></i> حفظ وتحديث المخزون';
+                })
+                .withFailureHandler((err) => {
+                    alert('حدث خطأ: ' + err.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-save"></i> حفظ وتحديث المخزون';
+                })
+                .saveInventoryData(payload);
+        }
+    </script>
+</body>
+</html>

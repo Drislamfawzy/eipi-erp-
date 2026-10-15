@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز التقارير الشامل - EIPI Factory ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a; --primary-light: #1e293b; --accent: #7c3aed; --accent-hover: #6d28d9;
+            --success: #16a34a; --warning: #d97706; --danger: #dc2626; --info: #0284c7;
+            --bg-main: #f8fafc; --card-bg: #ffffff; --text-main: #334155; --text-muted: #64748b;
+            --border-color: #e2e8f0; --radius: 16px; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+
+        .header-container { max-width: 1200px; width: 100%; margin: 0 auto 20px auto; background: var(--card-bg); padding: 20px 24px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 4px solid var(--accent); }
+        .brand-section h1 { font-size: 1.4rem; color: var(--primary); font-weight: 900; }
+        .brand-section p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+        .nav-home-btn { display: flex; align-items: center; gap: 8px; background: var(--bg-main); color: var(--primary); padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s ease; cursor: pointer; }
+        .nav-home-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .main-container { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        .filter-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 15px; }
+        .date-inputs-wrapper { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
+        .form-group label { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+        .form-control { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'Cairo', sans-serif; font-weight: bold; color: var(--primary); outline: none; }
+        .form-control:focus { border-color: var(--accent); }
+        
+        .btn-filter { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; height: 43px; }
+        .btn-filter:hover { background: var(--accent-hover); }
+
+        .quick-filters { display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px dashed var(--border-color); padding-top: 12px; }
+        .btn-quick { background: #f1f5f9; color: var(--primary); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .btn-quick:hover, .btn-quick.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .tabs-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+        .tab-btn { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); text-align: right; }
+        .tab-btn i { font-size: 1.5rem; color: var(--accent); width: 45px; height: 45px; background: #f3e8ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .tab-btn h3 { font-size: 1rem; font-weight: 800; color: var(--primary); }
+        .tab-btn p { font-size: 0.75rem; color: var(--text-muted); }
+        .tab-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); }
+        .tab-btn.active i { background: #fff; color: var(--primary); }
+        .tab-btn.active h3, .tab-btn.active p { color: #fff; }
+
+        .report-section { background: var(--card-bg); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: none; }
+        .report-section.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        .section-title { font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-right: 4px solid var(--accent); padding-right: 10px; }
+
+        .metrics-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .mini-card { background: var(--bg-main); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .mini-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 5px; }
+        .mini-val { font-size: 1.3rem; font-weight: 900; color: var(--primary); }
+
+        .data-table-wrapper { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .data-table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
+        .data-table th, .data-table td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        .data-table th { background: var(--bg-main); color: var(--primary); font-weight: 700; }
+        .data-table tr.clickable-row { cursor: pointer; transition: background 0.15s; }
+        .data-table tr.clickable-row:hover { background: #edf2f7; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
+        .modal-card { background: var(--card-bg); width: 100%; max-width: 650px; border-radius: var(--radius); padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: fadeIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--danger); }
+
+        .footer { text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 15px 0; border-top: 1px solid var(--border-color); max-width: 1200px; width: 100%; margin: 20px auto 0 auto; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <div class="brand-section">
+            <h1>مركز التقارير الشامل (Reports Center)</h1>
+            <p>تقارير العهدة، المبيعات (خروج منتج)، السلف، والمرتبات حسب الفترات الزمنية</p>
+        </div>
+        <a href="#" onclick="goHome(event)" class="nav-home-btn">
+            <i class="fa-solid fa-house"></i>
+            <span>الرئيسية للداشبورد</span>
+        </a>
+    </header>
+
+    <main class="main-container">
+        
+        <div class="filter-card">
+            <div class="date-inputs-wrapper">
+                <div class="form-group">
+                    <label for="startDate">من تاريخ:</label>
+                    <input type="date" id="startDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">إلى تاريخ:</label>
+                    <input type="date" id="endDate" class="form-control">
+                </div>
+                <button class="btn-filter" onclick="fetchReportsData()">
+                    <i class="fa-solid fa-filter"></i> تطبيق الفلتر
+                </button>
+            </div>
+            
+            <div class="quick-filters">
+                <span style="font-weight: 700; font-size: 0.85rem; align-self: center; margin-left: 5px;">فلتر جاهز:</span>
+                <button class="btn-quick active" onclick="setQuickFilter('currentMonth')">الشهر الحالي</button>
+                <button class="btn-quick" onclick="setQuickFilter('lastMonth')">الشهر الفائت</button>
+                <button class="btn-quick" onclick="setQuickFilter('allTime')">كل الوقت</button>
+            </div>
+        </div>
+
+        <div class="tabs-nav">
+            <div class="tab-btn active" onclick="switchTab('pettyCash', this)">
+                <i class="fa-solid fa-wallet"></i>
+                <div>
+                    <h3>تقرير العهدة</h3>
+                    <p>الوارد والصادر والمصروفات</p>
+                </div>
+            </div>
+            <div class="tab-btn" onclick="switchTab('dispatch', this)">
+                <i class="fa-solid fa-truck-ramp-loading"></i>
+                <div>
+                    <h3>خروج منتج</h3>
+                    <p>أذونات الشحن والمبيعات</p>
+                </div>
+            </div>
+            <div class="tab-btn" onclick="switchTab('advances', this)">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <div>
+                    <h3>تقرير السلف</h3>
+                    <p>سلف وحركات الموظفين</p>
+                </div>
+            </div>
+            <div class="tab-btn" onclick="switchTab('payroll', this)">
+                <i class="fa-solid fa-users-gear"></i>
+                <div>
+                    <h3>تقرير المرتبات</h3>
+                    <p>الأجور والصافي والخصومات</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. عهدة -->
+        <div id="section-pettyCash" class="report-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+    <h3 class="section-title" style="margin-bottom: 0;"><i class="fa-solid fa-wallet"></i> تقرير حركة العهدة والنقدية</h3>
+    <button onclick="sendPettyCashReportPDF()" style="background: var(--success); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+        <i class="fa-solid fa-file-pdf"></i> إرسال تقرير العهدة المفلتر PDF
+    </button>
+</div>
+            <div class="metrics-mini-grid">
+                <div class="mini-card"><div class="mini-title">إجمالي الوارد</div><div class="mini-val" id="pc_in">0 ج.م</div></div>
+                <div class="mini-card"><div class="mini-title">إجمالي الصادر</div><div class="mini-val" id="pc_out">0 ج.م</div></div>
+                <div class="mini-card"><div class="mini-title">صافي رصيد الفترة</div><div class="mini-val" id="pc_net">0 ج.م</div></div>
+            </div>
+            <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>التاريخ</th><th>نوع الحركة</th><th>البند</th><th>المبلغ</th><th>البيان / ملاحظات</th></tr></thead>
+                    <tbody id="pcTableBody"><tr><td colspan="5" style="text-align:center;">جاري تحميل البيانات...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. خروج منتج -->
+        <div id="section-dispatch" class="report-section">
+            <h3 class="section-title"><i class="fa-solid fa-truck-ramp-loading"></i> تقرير أذونات خروج المنتجات والمبيعات</h3>
+            <div class="metrics-mini-grid">
+                <div class="mini-card"><div class="mini-title">إجمالي الكمية المنصرفة</div><div class="mini-val" id="disp_qty">0 عبوة</div></div>
+                <div class="mini-card"><div class="mini-title">إجمالي النقدية المحصلة</div><div class="mini-val" id="disp_cash">0 ج.م</div></div>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: var(--primary);">ملخص الكميات حسب الأصناف المنصرفة:</h4>
+            <div class="data-table-wrapper" style="margin-bottom: 20px;">
+                <table class="data-table">
+                    <thead><tr><th>الصنف / المنتج</th><th>إجمالي الكمية الخارجة</th></tr></thead>
+                    <tbody id="dispGroupedBody"><tr><td colspan="2" style="text-align:center;">لا توجد بيانات</td></tr></tbody>
+                </table>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--primary);">سجل الحركات التفصيلي:</h4>
+            <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>التاريخ</th><th>رقم الإذن</th><th>اسم العميل</th><th>الصنف</th><th>الكمية</th><th>المبلغ النقدي</th></tr></thead>
+                    <tbody id="dispTableBody"><tr><td colspan="6" style="text-align:center;">جاري التحميل...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. السلف -->
+        <div id="section-advances" class="report-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+    <h3 class="section-title" style="margin-bottom: 0;"><i class="fa-solid fa-file-invoice-dollar"></i> تقرير السلف الإجمالي للموظفين</h3>
+    <button onclick="sendAdvancesReportPDF()" style="background: var(--success); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+        <i class="fa-solid fa-file-pdf"></i> إرسال تقرير السلف المفلتر PDF
+    </button>
+</div>
+            <div class="metrics-mini-grid">
+                <div class="mini-card"><div class="mini-title">إجمالي السلف المنصرفة للفترة</div><div class="mini-val" id="adv_total">0 ج.م</div></div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;"><i class="fa-solid fa-circle-info"></i> اضغط على أي سطر أدناه لعرض تفاصيل المرات والمبالغ بالكامل.</p>
+            <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الموظف</th>
+                            <th>تاريخ المعاملة (آخر سلفة)</th>
+                            <th>عدد مرات السلف</th>
+                            <th>إجمالي المبلغ المسحوب</th>
+                        </tr>
+                    </thead>
+                    <tbody id="advGroupedBody"><tr><td colspan="4" style="text-align:center;">جاري التحميل...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. المرتبات (مع زر الإرسال الشامل) -->
+        <div id="section-payroll" class="report-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                <h3 class="section-title" style="margin-bottom: 0;"><i class="fa-solid fa-users-gear"></i> تقرير مرتبات وأجور العاملين</h3>
+                <button onclick="sendFullPayrollReport()" style="background: var(--success); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-file-pdf"></i> إرسال تقرير المرتبات الشامل للإدارة
+                </button>
+            </div>
+
+            <div class="metrics-mini-grid">
+                <div class="mini-card"><div class="mini-title">إجمالي صافي المرتبات المنصرفة</div><div class="mini-val" id="pay_net">0 ج.م</div></div>
+                <div class="mini-card"><div class="mini-title">إجمالي الخصومات والجزاءات</div><div class="mini-val" id="pay_ded">0 ج.م</div></div>
+                <div class="mini-card"><div class="mini-title">إجمالي الإضافات والحوافز</div><div class="mini-val" id="pay_add">0 ج.م</div></div>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin-top: 20px; margin-bottom: 10px; color: var(--primary);">ملخص أجور الموظفين للفترة:</h4>
+            <div class="data-table-wrapper" style="margin-bottom: 20px;">
+                <table class="data-table">
+                    <thead><tr><th>اسم الموظف</th><th>إجمالي أيام الحضور</th><th>إجمالي الخصومات</th><th>إجمالي الإضافات</th><th>إجمالي الصافي</th></tr></thead>
+                    <tbody id="payGroupedBody"><tr><td colspan="5" style="text-align:center;">لا توجد بيانات</td></tr></tbody>
+                </table>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--primary);">سجل صرف المرتبات التفصيلي <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(انقر على السطر لعرض التفاصيل الكاملة)</span>:</h4>
+            <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>التاريخ</th><th>اسم الموظف</th><th>أيام الحضور</th><th>الخصومات</th><th>الإضافات</th><th>صافي المستحق</th></tr></thead>
+                    <tbody id="payTableBody"><tr><td colspan="6" style="text-align:center;">جاري التحميل...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- نافذة تفاصيل السلف المنبثقة -->
+    <div id="advModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalEmpName" style="color: var(--primary); font-weight: 800; font-size: 1.1rem;">تفاصيل السلف</h3>
+                <button class="modal-close" onclick="closeModal('advModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="data-table-wrapper" style="margin-top: 0;">
+                <table class="data-table">
+                    <thead><tr><th>تاريخ السلفة</th><th>المبلغ</th><th>ملاحظات / البيان</th></tr></thead>
+                    <tbody id="modalAdvBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل المرتبات المنبثقة -->
+    <div id="payModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalPayTitle" style="color: var(--primary); font-weight: 800; font-size: 1.1rem;">تفاصيل المرتب</h3>
+                <button class="modal-close" onclick="closeModal('payModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modalPayContent" style="font-size: 0.95rem; line-height: 1.8;"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>EIPI Factory ERP &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+        let globalAdvancesItems = [];
+        let globalPayrollItems = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            setQuickFilter('currentMonth');
+        });
+
+        function goHome(e) {
+            if(e) e.preventDefault();
+            if (BASE_URL && BASE_URL.startsWith('http')) {
+                window.top.location.href = `${BASE_URL}?page=Dashboard`;
+            } else {
+                const current = window.location.href.split('?')[0];
+                window.top.location.href = `${current}?page=Dashboard`;
+            }
+        }
+
+        function switchTab(sectionId, btnElement) {
+            document.querySelectorAll('.report-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('section-' + sectionId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        function setQuickFilter(type) {
+            document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const now = new Date();
+            let start = '', end = '';
+
+            if (type === 'currentMonth') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+            } else if (type === 'lastMonth') {
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+                end = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
+            } else if (type === 'allTime') {
+                start = '2020-01-01';
+                end = '2030-12-31';
+            }
+
+            document.getElementById('startDate').value = start;
+            document.getElementById('endDate').value = end;
+            fetchReportsData();
+        }
+
+        function fetchReportsData() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res && res.status === "success") {
+                        renderReports(res.data);
+                    } else {
+                        alert("خطأ في جلب بيانات التقارير: " + (res ? res.message : 'استجابة فارغة'));
+                    }
+                })
+                .withFailureHandler(err => alert("خطأ اتصال بالخادم: " + err.message))
+                .getComprehensiveReportsData(start, end);
+        }
+
+        function renderReports(data) {
+            if (!data) return;
+
+            try {
+                // 1. عهدة
+                const pc = data.pettyCash || { summary: { totalInbound: 0, totalOutbound: 0, netBalance: 0 }, items: [] };
+                document.getElementById('pc_in').innerText = (pc.summary.totalInbound || 0).toLocaleString() + ' ج.م';
+                document.getElementById('pc_out').innerText = (pc.summary.totalOutbound || 0).toLocaleString() + ' ج.م';
+                document.getElementById('pc_net').innerText = (pc.summary.netBalance || 0).toLocaleString() + ' ج.م';
+                document.getElementById('pcTableBody').innerHTML = pc.items.length === 0 ? '<tr><td colspan="5" style="text-align:center;">لا توجد حركات عهدة</td></tr>' : 
+                    pc.items.map(i => `<tr><td>${i.date}</td><td><b>${i.type}</b></td><td>${i.category}</td><td style="font-weight:bold;">${i.amount.toLocaleString()} ج.م</td><td>${i.notes}</td></tr>`).join('');
+
+                // 2. خروج منتج
+                const disp = data.dispatch || { summary: { totalQty: 0, totalCash: 0 }, grouped: [], items: [] };
+                document.getElementById('disp_qty').innerText = (disp.summary.totalQty || 0).toLocaleString() + ' عبوة';
+                document.getElementById('disp_cash').innerText = (disp.summary.totalCash || 0).toLocaleString() + ' ج.م';
+                document.getElementById('dispGroupedBody').innerHTML = disp.grouped.length === 0 ? '<tr><td colspan="2" style="text-align:center;">لا توجد أصناف</td></tr>' :
+                    disp.grouped.map(g => `<tr><td><b>${g.itemName}</b></td><td style="font-weight:bold; color:var(--accent);">${g.totalQty.toLocaleString()} عبوة</td></tr>`).join('');
+                document.getElementById('dispTableBody').innerHTML = disp.items.length === 0 ? '<tr><td colspan="6" style="text-align:center;">لا توجد أذونات خروج</td></tr>' :
+                    disp.items.map(i => `<tr><td>${i.date}</td><td>${i.dispatchNo || '---'}</td><td>${i.clientName}</td><td>${i.itemName}</td><td style="font-weight:bold;">${i.qty.toLocaleString()}</td><td>${i.cash.toLocaleString()} ج.م</td></tr>`).join('');
+
+                // 3. السلف
+                const adv = data.advances || { summary: { totalAmount: 0 }, grouped: [], items: [] };
+                globalAdvancesItems = adv.items || [];
+                document.getElementById('adv_total').innerText = (adv.summary.totalAmount || 0).toLocaleString() + ' ج.م';
+                document.getElementById('advGroupedBody').innerHTML = adv.grouped.length === 0 ? '<tr><td colspan="4" style="text-align:center;">لا توجد سلف مسجلة</td></tr>' :
+                    adv.grouped.map(g => `
+                        <tr class="clickable-row" onclick="openEmpAdvancesModal('${g.employeeName}')">
+                            <td><b>${g.employeeName}</b></td>
+                            <td>${g.lastDate}</td>
+                            <td>${g.count} مرات</td>
+                            <td style="font-weight:bold; color:var(--warning);">${g.total.toLocaleString()} ج.م</td>
+                        </tr>
+                    `).join('');
+
+                // 4. المرتبات
+                const pay = data.payroll || { summary: { totalNet: 0, totalDeductions: 0, totalAdditions: 0 }, grouped: [], items: [] };
+                globalPayrollItems = pay.items || [];
+                document.getElementById('pay_net').innerText = (pay.summary.totalNet || 0).toLocaleString() + ' ج.م';
+                document.getElementById('pay_ded').innerText = (pay.summary.totalDeductions || 0).toLocaleString() + ' ج.م';
+                document.getElementById('pay_add').innerText = (pay.summary.totalAdditions || 0).toLocaleString() + ' ج.م';
+
+                document.getElementById('payGroupedBody').innerHTML = pay.grouped.length === 0 ? '<tr><td colspan="5" style="text-align:center;">لا توجد مرتبات مسجلة</td></tr>' :
+                    pay.grouped.map(g => `<tr><td><b>${g.employeeName}</b></td><td>${g.days} يوم</td><td style="color:var(--danger);">${g.deductions.toLocaleString()} ج.م</td><td style="color:var(--success);">${g.additions.toLocaleString()} ج.م</td><td style="font-weight:bold; color:var(--primary);">${g.net.toLocaleString()} ج.م</td></tr>`).join('');
+
+                document.getElementById('payTableBody').innerHTML = pay.items.length === 0 ? '<tr><td colspan="6" style="text-align:center;">لا توجد سجلات مرتبات</td></tr>' :
+                    pay.items.map((i, index) => `
+                        <tr class="clickable-row" onclick="openPayrollDetailModal(${index})" title="انقر لعرض تفاصيل أجر الموظف">
+                            <td>${i.date}</td>
+                            <td><b>${i.employeeName}</b> ${i.dailyWage === 550 ? '<span style="background:#ede9fe; color:#7c3aed; padding:2px 6px; border-radius:4px; font-size:0.75rem;">مدير</span>' : ''}</td>
+                            <td>${i.attendanceDays} يوم</td>
+                            <td style="color:var(--danger);">${i.totalDeductions.toLocaleString()} ج.م</td>
+                            <td style="color:var(--success);">${i.totalAdditions.toLocaleString()} ج.م</td>
+                            <td style="font-weight:bold; color:var(--primary);">${i.netSalary.toLocaleString()} ج.م</td>
+                        </tr>
+                    `).join('');
+
+            } catch (err) {
+                console.error("خطأ أثناء رسم البيانات:", err);
+            }
+        }
+
+        function openEmpAdvancesModal(empName) {
+            const empRecords = globalAdvancesItems.filter(i => i.employeeName === empName);
+            document.getElementById('modalEmpName').innerText = `تفاصيل سلف الموظف: ${empName} (عدد الحركات: ${empRecords.length})`;
+            const tbody = document.getElementById('modalAdvBody');
+            tbody.innerHTML = empRecords.map(r => `<tr><td>${r.date}</td><td style="font-weight:bold; color:var(--warning);">${r.amount.toLocaleString()} ج.م</td><td>${r.notes || '---'}</td></tr>`).join('');
+            document.getElementById('advModal').style.display = 'flex';
+        }
+
+        function openPayrollDetailModal(index) {
+            const item = globalPayrollItems[index];
+            if (!item) return;
+
+            const modalTitle = document.getElementById('modalPayTitle');
+            const modalContent = document.getElementById('modalPayContent');
+
+            if (item.dailyWage === 550) {
+                modalTitle.innerText = `تفاصيل عمولة مدير الإنتاج: ${item.employeeName}`;
+                modalContent.innerHTML = `
+                    <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:15px;">
+                        <p><b>تاريخ الاستحقاق:</b> ${item.date}</p>
+                        <p><b>أجر اليوم الأساسي:</b> ${item.dailyWage.toLocaleString()} ج.م</p>
+                    </div>
+                    <h4 style="color:var(--accent); margin-bottom:8px;">حساب العمولة الشهرية:</h4>
+                    <ul style="list-style-type:disc; padding-right:20px; margin-bottom:15px;">
+                        <li>إجمالي كمية خروج منتج (عبوات) خلال الشهر: <b>${item.abwaQty.toLocaleString()} عبوة</b></li>
+                        <li>نسبة العمولة لكل عبوة: <b>1.1 قرش (0.011 ج.م)</b></li>
+                    </ul>
+                    <div style="background:#dcfce7; color:#16a34a; padding:12px; border-radius:8px; font-weight:bold; text-align:center; font-size:1.1rem;">
+                        إجمالي مبلغ العمولة المحسوبة: ${item.managerCommission.toLocaleString()} ج.م
+                    </div>
+                `;
+            } else {
+                modalTitle.innerText = `تفاصيل أجر العامل: ${item.employeeName} (${item.date})`;
+                modalContent.innerHTML = `
+                    <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px; display:flex; justify-content:space-between;">
+                        <span>عدد أيام الحضور الفعلية: <b>${item.attendanceDays} يوم</b></span>
+                        <span>أجر اليوم: <b>${item.dailyWage.toLocaleString()} ج.م</b></span>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <h4 style="color:var(--success); font-size:0.95rem; margin-bottom:5px;"><i class="fa-solid fa-plus-circle"></i> تفصيل الإضافات كاملة:</h4>
+                        <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px solid #bbf7d0; font-size:0.88rem;">
+                            <p>أجر الأوفر تايم (${item.overtimeHours} ساعة): <b>${item.overtimePay.toLocaleString()} ج.م</b></p>
+                            <p>مكافأة الإنتاج (${item.productionBonus}): <b>${item.productionBonusAmount.toLocaleString()} ج.م</b></p>
+                            <p>الحوافز والمكافآت الإضافية: <b>${item.incentives.toLocaleString()} ج.م</b></p>
+                            <hr style="border:0; border-top:1px dashed #bbf7d0; margin:6px 0;">
+                            <p style="font-weight:bold; color:var(--success);">إجمالي الإضافات: ${item.totalAdditions.toLocaleString()} ج.م</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <h4 style="color:var(--danger); font-size:0.95rem; margin-bottom:5px;"><i class="fa-solid fa-minus-circle"></i> تفصيل الخصومات كاملة:</h4>
+                        <div style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca; font-size:0.88rem;">
+                            <p>خصم التأخير (${item.delayHours} ساعة): <b>${item.delayDeduction.toLocaleString()} ج.م</b></p>
+                            <p>خصم الجزاءات والمخالفات: <b>${item.penaltyDeduction.toLocaleString()} ج.م</b></p>
+                            <p>خصم الغياب بدون إذن (${item.unexcusedAbsence} يوم): <b>${item.absenceDeduction.toLocaleString()} ج.م</b></p>
+                            <p>السلف المستقطعة لشهر: <b>${item.advances.toLocaleString()} ج.م</b></p>
+                            <hr style="border:0; border-top:1px dashed #fecaca; margin:6px 0;">
+                            <p style="font-weight:bold; color:var(--danger);">إجمالي الخصومات: ${item.totalDeductions.toLocaleString()} ج.م</p>
+                        </div>
+                    </div>
+
+                    <div style="background:#eff6ff; color:#1d4ed8; padding:12px; border-radius:8px; font-weight:bold; text-align:center; font-size:1.1rem; margin-bottom: 15px;">
+                        صافي المستحق للعامل: ${item.netSalary.toLocaleString()} ج.م
+                    </div>
+
+                    <button onclick='sendPayrollEmail(${JSON.stringify(item)})' style="background:var(--accent); color:#fff; border:none; width:100%; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fa-solid fa-file-pdf"></i> تصدير وإرسال التقرير للإدارة عبر البريد
+                    </button>
+                `;
+            }
+
+            document.getElementById('payModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function sendPayrollEmail(itemObj) {
+            if(!confirm(`هل تريد إرسال تقرير مرتب العامل (${itemObj.employeeName}) إلى الإدارة؟`)) return;
+            
+            google.script.run
+                .withSuccessHandler(msg => alert(msg))
+                .withFailureHandler(err => alert("خطأ: " + err.message))
+                .sendWorkerPayrollEmail(itemObj);
+        }
+
+        function sendFullPayrollReport() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+
+            if(!confirm(`هل تريد تصدير وإرسال تقرير المرتبات الشامل (PDF) للفترة من (${start || 'البداية'}) إلى (${end || 'اليوم'}) عبر البريد الإلكتروني للإدارة؟`)) return;
+
+            google.script.run
+                .withSuccessHandler(msg => alert(msg))
+                .withFailureHandler(err => alert("خطأ: " + err.message))
+                .sendComprehensivePayrollReportPDF(start, end);
+        }
+        function sendPettyCashReportPDF() {
+         const start = document.getElementById('startDate').value;
+         const end = document.getElementById('endDate').value;
+
+         if(!confirm(`هل تريد تصدير وإرسال تقرير العهدة المفلتر (PDF) للفترة من (${start || 'البداية'}) إلى (${end || 'اليوم'}) عبر البريد الإلكتروني للإدارة؟`)) return;
+
+         google.script.run
+             .withSuccessHandler(msg => alert(msg))
+             .withFailureHandler(err => alert("خطأ: " + err.message))
+             .sendPettyCashReportPDF(start, end);
+     }
+
+     function sendAdvancesReportPDF() {
+         const start = document.getElementById('startDate').value;
+         const end = document.getElementById('endDate').value;
+
+         if(!confirm(`هل تريد تصدير وإرسال تقرير السلف المفلتر (PDF) للفترة من (${start || 'البداية'}) إلى (${end || 'اليوم'}) عبر البريد الإلكتروني للإدارة؟`)) return;
+
+         google.script.run
+             .withSuccessHandler(msg => alert(msg))
+             .withFailureHandler(err => alert("خطأ: " + err.message))
+             .sendAdvancesReportPDF(start, end);
+     }
+    </script>
+</body>
+</html>

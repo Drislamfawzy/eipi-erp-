@@ -186,266 +186,251 @@
     </style>
 </head>
 <body>
-
     <div class="app-container">
-        <header class="app-header">
-            <h1>إذن استلام خامات (Inbound)</h1>
-        </header>
+      <header class="app-header">
+        <h1>إذن استلام خامات (Inbound)</h1>
+      </header>
 
-        <form id="inboundForm" onsubmit="submitInbound(event)">
-            
-            <!-- Header Section -->
-            <div class="card">
-                <div class="card-title">بيانات الاستلام</div>
-                
-                <div class="form-group">
-                    <label for="partnerId">المورد</label>
-                    <select id="partnerId" required>
-                        <option value="" disabled selected>اختر المورد...</option>
-                        <option value="PTN-0050">شركة البلاستيك الحديثة (مورد خامات)</option>
-                        <option value="PTN-0051">مجموعة التعبئة الدولية</option>
-                        <!-- يتم جلب باقي الموردين ديناميكياً من الـ Backend -->
-                    </select>
-                </div>
+      <form id="inboundForm">
+        <!-- Header Section -->
+        <div class="card">
+          <div class="card-title">بيانات الاستلام</div>
 
-                <div class="form-group">
-                    <label for="docRef">رقم إذن الاستلام الورقي / فاتورة المورد</label>
-                    <input type="text" id="docRef" placeholder="أدخل الرقم الورقي الإلزامي..." required>
-                </div>
+          <div class="form-group">
+            <label for="partnerId">المورد</label>
+            <select id="partnerId" required>
+              <option value="" disabled selected>جاري تحميل الموردين...</option>
+            </select>
+          </div>
 
-                <div class="form-group">
-                    <label for="eventDate">التاريخ</label>
-                    <input type="date" id="eventDate" required>
-                </div>
+          <div class="form-group">
+            <label for="docRef">رقم إذن الاستلام الورقي / فاتورة المورد</label>
+            <input type="text" id="docRef" placeholder="أدخل الرقم الورقي الإلزامي..." required />
+          </div>
+
+          <div class="form-group">
+            <label for="eventDate">التاريخ</label>
+            <input type="date" id="eventDate" required />
+          </div>
+        </div>
+
+        <!-- Lines Section -->
+        <div class="card">
+          <div class="card-title">الأصناف الواردة</div>
+
+          <div id="inboundLinesContainer">
+            <div class="inbound-line">
+              <button type="button" class="remove-btn" onclick="removeLine(this)">&times;</button>
+              <div class="form-group">
+                <label>الخامة / الصنف</label>
+                <select class="itemId" required>
+                  <option value="" disabled selected>جاري تحميل الخامات...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>الكمية المستلمة</label>
+                <input type="number" class="inboundQty" min="1" step="any" placeholder="مثال: 5000" required />
+              </div>
             </div>
+          </div>
 
-            <!-- Lines Section -->
-            <div class="card">
-                <div class="card-title">الأصناف الواردة</div>
-                
-                <div id="inboundLinesContainer">
-                    <!-- سطر صنف افتراضي أول -->
-                    <div class="inbound-line">
-                        <button type="button" class="remove-btn" onclick="removeLine(this)">&times;</button>
-                        <div class="form-group">
-                            <label>الصنف (خامات / بريفورم / أكياس)</label>
-                            <select class="itemId" required>
-                                <option value="" disabled selected>اختر الصنف الوارد...</option>
-                                <option value="ITM-0100">حبوب بيتي إتش دي (HDPE)</option>
-                                <option value="ITM-0101">بريفورم جاهز 24 جرام</option>
-                                <option value="ITM-0102">أكياس تعبئة بلاستيك</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>الكمية المستلمة</label>
-                            <input type="number" class="inboundQty" min="1" step="any" placeholder="مثال: 5000" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="button" class="btn-secondary" onclick="addInboundLine()">+ إضافة صنف وارد آخر</button>
+          <button type="button" class="btn-secondary" onclick="addInboundLine()">
+            + إضافة صنف وارد آخر
+          </button>
+        </div>
+        
+        <!-- حقل رفع صورة الإذن -->
+        <div class="card">
+            <div class="card-title">المرفقات</div>
+            <div class="form-group">
+                <label for="receiptImage">صورة الإذن (اختياري)</label>
+                <input type="file" id="receiptImage" accept="image/*" />
             </div>
+        </div>
 
-            <!-- Action Section -->
-            <button type="submit" id="submitBtn" class="btn-primary">تأكيد واستلام الخامات</button>
-            <div id="statusMessage" class="status-message"></div>
-
-        </form>
+        <!-- Action Section -->
+        <button type="button" id="submitBtn" class="btn-primary" onclick="submitInbound(event)">
+          تأكيد واستلام الخامات
+        </button>
+        <div id="statusMessage" class="status-message"></div>
+      </form>
     </div>
 
     <!-- JS Logic -->
     <script>
-        // تعيين تاريخ اليوم كقيمة افتراضية عند تحميل الصفحة
-        document.addEventListener("DOMContentLoaded", function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById("eventDate").value = today;
-        });
+      const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+      let globalMaterials = []; // لحفظ الخامات واستخدامها عند إضافة سطر جديد
 
-        // إضافة سطر صنف جديد
-        function addInboundLine() {
-            const container = document.getElementById("inboundLinesContainer");
-            const firstLine = container.querySelector(".inbound-line");
-            const newLine = firstLine.cloneNode(true);
-            
-            // تفريغ القيم في السطر الجديد
-            newLine.querySelector(".itemId").value = "";
-            newLine.querySelector(".inboundQty").value = "";
-            
-            // إظهار زر الحذف للسطر الجديد
-            newLine.querySelector(".remove-btn").style.display = "block";
-            
-            container.appendChild(newLine);
-        }
+      // التهيئة عند تحميل الصفحة
+      document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("eventDate").value = today;
+        loadMasterData();
+      });
 
-        // حذف سطر صنف
-        function removeLine(btn) {
-            const line = btn.closest('.inbound-line');
-            line.remove();
-        }
-
-        // الدالة الرئيسية لإرسال النموذج وحماية الـ Double Submit
-        function submitInbound(event) {
-            event.preventDefault(); // منع إعادة تحميل الصفحة
-
-            const submitBtn = document.getElementById("submitBtn");
-            const statusDiv = document.getElementById("statusMessage");
-
-            // 1. حماية التزامن وتعطيل الزر وإظهار حالة التحميل
-            submitBtn.disabled = true;
-            submitBtn.innerText = "جاري المعالجة... الرجاء الانتظار";
-            statusDiv.style.display = "none";
-            statusDiv.className = "status-message";
-
-            // 2. بناء هيكل الـ Payload المطلوب
-            const payload = {
-                partnerId: document.getElementById("partnerId").value,
-                date: document.getElementById("eventDate").value,
-                docRef: document.getElementById("docRef").value,
-                lines: []
-            };
-
-            // تجميع الأصناف والكميات الواردة
-            const lines = document.querySelectorAll(".inbound-line");
-            lines.forEach(line => {
-                const itemId = line.querySelector(".itemId").value;
-                const qty = line.querySelector(".inboundQty").value;
-                
-                if (itemId && qty) {
-                    payload.lines.push({
-                        itemId: itemId,
-                        qty: parseFloat(qty)
-                    });
-                }
+      // جلب البيانات الأساسية (الموردين والخامات)
+      function loadMasterData() {
+        google.script.run
+          .withSuccessHandler(function (data) {
+            // تعبئة قائمة الموردين
+            const supplierSelect = document.getElementById("partnerId");
+            supplierSelect.innerHTML = '<option value="" disabled selected>اختر المورد...</option>';
+            data.suppliers.forEach(supp => {
+              supplierSelect.innerHTML += `<option value="${supp}">${supp}</option>`;
             });
 
-            if(payload.lines.length === 0) {
-                alert("يجب إضافة صنف واحد على الأقل للاستلام.");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "تأكيد واستلام الخامات";
-                return;
+            // تعبئة قائمة الخامات في السطر الأول وحفظها
+            globalMaterials = data.materials;
+            const itemSelect = document.querySelector(".itemId");
+            itemSelect.innerHTML = '<option value="" disabled selected>اختر الخامة...</option>';
+            data.materials.forEach(mat => {
+              itemSelect.innerHTML += `<option value="${mat}">${mat}</option>`;
+            });
+          })
+          .withFailureHandler(function (error) {
+            console.error("خطأ في جلب قاعدة البيانات:", error);
+            alert("حدث خطأ في تحميل البيانات الأساسية.");
+          })
+          .getMasterData();
+      }
+
+      function goHome(e) {
+        if(e) e.preventDefault();
+        if (BASE_URL && BASE_URL.startsWith("http")) {
+          window.top.location.href = `${BASE_URL}?page=Home`;
+        } else {
+          const current = window.location.href.split("?")[0];
+          window.top.location.href = `${current}?page=Home`;
+        }
+      }
+
+      // إضافة سطر صنف جديد
+      function addInboundLine() {
+        const container = document.getElementById("inboundLinesContainer");
+        const firstLine = container.querySelector(".inbound-line");
+        const newLine = firstLine.cloneNode(true); // ينسخ السطر بالقائمة المعبأة بالفعل
+
+        newLine.querySelector(".itemId").value = "";
+        newLine.querySelector(".inboundQty").value = "";
+        newLine.querySelector(".remove-btn").style.display = "block";
+
+        container.appendChild(newLine);
+      }
+
+      function removeLine(btn) {
+        const line = btn.closest(".inbound-line");
+        line.remove();
+      }
+
+      // قراءة الملف وتحويله إلى Base64
+      function getFileBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+      }
+
+      // دالة الإرسال الرئيسية (محدثة لاصطياد الأخطاء الصامتة)
+      async function submitInbound(event) {
+        event.preventDefault();
+
+        const submitBtn = document.getElementById("submitBtn");
+        const statusDiv = document.getElementById("statusMessage");
+
+        const partnerId = document.getElementById("partnerId").value;
+        const docRef = document.getElementById("docRef").value;
+
+        // التحقق من الحقول المطلوبة
+        if(!partnerId || !docRef){
+            alert("يرجى اختيار المورد وإدخال رقم الإذن.");
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "جاري المعالجة... الرجاء الانتظار";
+        statusDiv.style.display = "none";
+        statusDiv.className = "status-message";
+
+        const items = [];
+        const lines = document.querySelectorAll(".inbound-line");
+        lines.forEach((line) => {
+          const itemId = line.querySelector(".itemId").value;
+          const qty = line.querySelector(".inboundQty").value;
+          if (itemId && qty) {
+            items.push({ materialName: itemId, quantity: parseFloat(qty) });
+          }
+        });
+
+        if (items.length === 0) {
+          alert("يجب إضافة صنف واحد على الأقل للاستلام.");
+          submitBtn.disabled = false;
+          submitBtn.innerText = "تأكيد واستلام الخامات";
+          return;
+        }
+
+        try {
+            let receiptUrl = "";
+            const fileInput = document.getElementById('receiptImage');
+            
+            // معالجة رفع الصورة إذا وجدت
+            if (fileInput.files.length > 0) {
+                submitBtn.innerText = "جاري رفع الصورة...";
+                const file = fileInput.files[0];
+                const base64Data = await getFileBase64(file);
+                
+                receiptUrl = await new Promise((resolve, reject) => {
+                    google.script.run
+                        .withSuccessHandler(resolve)
+                        .withFailureHandler(reject)
+                        .uploadReceiptImage(base64Data, file.name);
+                });
             }
 
-            // 3. إرسال البيانات للـ Backend عبر Google Apps Script API
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    // قراءة رقم الإذن من response.data.eventId كما طلبت
-                    const eventId = (response && response.data && response.data.eventId) ? response.data.eventId : "مؤكد";
-                    
-                    statusDiv.innerText = "تم استلام الخامات بنجاح! رقم الإذن: " + eventId;
-                    statusDiv.classList.add("status-success");
-                    
-                    // إعادة تهيئة النموذج بالكامل
-                    document.getElementById("inboundForm").reset();
-                    document.getElementById("eventDate").value = new Date().toISOString().split('T')[0];
-                    
-                    // حذف كل الأسطر الإضافية وترك الأول فقط
-                    const container = document.getElementById("inboundLinesContainer");
-                    while (container.children.length > 1) {
-                        container.removeChild(container.lastChild);
-                    }
+            const payload = {
+                supplierName: partnerId,
+                date: document.getElementById("eventDate").value,
+                docRef: docRef,
+                items: items,
+                receiptUrl: receiptUrl
+            };
 
-                    // إعادة تفعيل الزر
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "تأكيد واستلام الخامات";
-                })
-                .withFailureHandler(function(error) {
-                    statusDiv.innerText = "خطأ في المعالجة: " + error.message;
-                    statusDiv.classList.add("status-error");
-                    
-                    // إعادة تفعيل الزر لتمكين المستخدم من إعادة المحاولة
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "تأكيد واستلام الخامات";
-                })
-                .api_saveInbound(payload);
-        }
-    </script>
-    <script>
-    function goHome(event) {
-        event.preventDefault();
-        // إذا كان BASE_URL معرفاً، انتقل إليه، وإلا اقطع الرابط للوصول للرئيسية
-        const base = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : window.location.href.split('?')[0];
-        window.top.location.href = base;
-    }
-    const BASE_URL = "<?= scriptUrl ?>";
-
-function goHome(e) {
-    e.preventDefault();
-    if (BASE_URL && BASE_URL.startsWith('http')) {
-        window.top.location.href = `${BASE_URL}?page=Home`;
-    } else {
-        const current = window.location.href.split('?')[0];
-        window.top.location.href = `${current}?page=Home`;
-    }
-}
-
-function addInboundRow() {
-    const tbody = document.getElementById('inboundTableBody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td><input type="text" class="form-control" placeholder="مثال: حبيبات PET عذراء" required></td>
-        <td><input type="number" class="form-control" placeholder="الكمية / الوزن" required min="1"></td>
-        <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeInboundRow(this)"><i class="fa-solid fa-trash"></i></button></td>
-    `;
-    tbody.appendChild(newRow);
-}
-
-function removeInboundRow(btn) {
-    const tbody = document.getElementById('inboundTableBody');
-    if (tbody.rows.length > 1) {
-        btn.closest('tr').remove();
-    } else {
-        alert('يجب تسجيل خامة واحدة على الأقل في الإذن.');
-    }
-}
-
-function submitInbound(e) {
-    e.preventDefault();
-    const submitBtn = document.querySelector('.btn-submit');
-    const originalText = submitBtn.innerHTML;
-
-    const supplierName = document.getElementById('supplierName').value;
-    
-    const items = [];
-    const rows = document.querySelectorAll('#inboundTableBody tr');
-    rows.forEach(row => {
-        const inputs = row.querySelectorAll('input');
-        items.push({
-            materialName: inputs[0].value,
-            quantity: Number(inputs[1].value)
-        });
-    });
-
-    const payload = {
-        supplierName: supplierName,
-        items: items
-    };
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري استلام وتسجيل الخامات...';
-
-    google.script.run
-        .withSuccessHandler(function(response) {
-            alert('تم استلام الخامات وتسجيلها بالمخزن بنجاح!');
-            document.getElementById('inboundForm').reset();
+            submitBtn.innerText = "جاري الحفظ في السجلات...";
             
-            document.getElementById('inboundTableBody').innerHTML = `
-                <tr>
-                    <td><input type="text" class="form-control" placeholder="مثال: حبيبات PET عذراء" required></td>
-                    <td><input type="number" class="form-control" placeholder="الكمية / الوزن" required min="1"></td>
-                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeInboundRow(this)"><i class="fa-solid fa-trash"></i></button></td>
-                </tr>
-            `;
+            // إرسال البيانات للحفظ
+            await new Promise((resolve, reject) => {
+                google.script.run
+                  .withSuccessHandler(resolve)
+                  .withFailureHandler(reject)
+                  .saveInboundData(payload);
+            });
+
+            // لو كل حاجة تمام
+            statusDiv.innerText = "تم استلام الخامات ورفع الصورة بنجاح!";
+            statusDiv.classList.add("status-success");
+            statusDiv.style.display = "block";
+
+            document.getElementById("inboundForm").reset();
+            document.getElementById("eventDate").value = new Date().toISOString().split("T")[0];
+            const container = document.getElementById("inboundLinesContainer");
+            while (container.children.length > 1) {
+              container.removeChild(container.lastChild);
+            }
 
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        })
-        .withFailureHandler(function(error) {
-            alert('حدث خطأ أثناء الاستلام: ' + error.message);
+            submitBtn.innerText = "تأكيد واستلام الخامات";
+
+        } catch (error) {
+            // صيد الأخطاء وعرضها على الشاشة
+            statusDiv.innerText = "خطأ في المعالجة: " + error.message;
+            statusDiv.classList.add("status-error");
+            statusDiv.style.display = "block";
+            
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        })
-        .saveInboundData(payload); // دالة الـ Backend المستقبلية للاستلام
-}
-</script>
+            submitBtn.innerText = "تأكيد واستلام الخامات";
+        }
+      }
+    </script>
 </body>
 </html>

@@ -41,11 +41,10 @@
         .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-main); color: var(--text-main); outline: none; transition: border-color 0.2s; }
         .form-control:focus { border-color: var(--accent); background: #fff; }
 
-        /* قسم الماكينات الديناميكي */
         .section-subtitle { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         
         .machines-table-wrapper { overflow-x: auto; margin-bottom: 15px; }
-        .machines-table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        .machines-table { width: 100%; border-collapse: collapse; min-width: 850px; }
         .machines-table th, .machines-table td { padding: 10px; border: 1px solid var(--border-color); text-align: right; vertical-align: middle; }
         .machines-table th { background: var(--bg-main); color: var(--primary); font-weight: 700; font-size: 0.95rem; }
 
@@ -68,7 +67,7 @@
     <header class="header-container">
         <div class="brand-section">
             <h1>تسجيل إنتاج الوردية (Production)</h1>
-            <p>إدارة وتسجيل أوامر الإنتاج لعدة ماكينات بالتوازي</p>
+            <p>إدارة وتسجيل أوامر الإنتاج لعدة ماكينات مع قراءات وقيم وإيصالات شحن الكهرباء</p>
         </div>
         <a href="#" onclick="goHome(event)" class="nav-home-btn">
             <i class="fa-solid fa-house"></i>
@@ -95,7 +94,47 @@
                 </div>
             </div>
 
-            <!-- جدول تفاصيل الإنتاج للماكينات المتعددة -->
+            <!-- قراءات عدادات الكهرباء وإيصالات الشحن -->
+            <div class="form-group" style="background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px;">
+                <div class="section-subtitle" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-charging-station" style="color: var(--warning);"></i>
+                    <span>قراءات عدادات الكهرباء والشحن</span>
+                </div>
+                
+                <div class="form-grid" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="elec1">قراءة عداد مصنع (1):</label>
+                        <input type="number" id="elec1" class="form-control" placeholder="أدخل قراءة العداد..." min="0" step="any">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="elec2">قراءة عداد مصنع (2):</label>
+                        <input type="number" id="elec2" class="form-control" placeholder="أدخل قراءة العداد..." min="0" step="any">
+                    </div>
+                </div>
+
+                <!-- شحن الكهرباء، القيمة، وصورة الإيصال -->
+                <div class="form-grid" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="hasRecharged">هل تم شحن كهرباء في هذه الوردية؟</label>
+                        <select id="hasRecharged" class="form-control">
+                            <option value="لا" selected>لا</option>
+                            <option value="نعم">نعم</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="rechargeAmountGroup" style="margin-bottom: 0; display: none;">
+                        <label for="rechargeAmount">قيمة الشحن (ج.م):</label>
+                        <input type="number" id="rechargeAmount" class="form-control" placeholder="0.00" min="0" step="0.01" style="background: #fff;">
+                    </div>
+
+                    <div class="form-group" id="receiptUploadGroup" style="margin-bottom: 0; display: none;">
+                        <label for="receiptImage">صورة إيصال شحن الكهرباء:</label>
+                        <input type="file" id="receiptImage" class="form-control" accept="image/*" style="background: #fff; padding: 9px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الماكينات الديناميكي -->
             <div class="form-group">
                 <div class="section-subtitle">
                     <i class="fa-solid fa-gears" style="color: var(--accent);"></i>
@@ -106,35 +145,39 @@
                     <table class="machines-table" id="machinesTable">
                         <thead>
                             <tr>
-                                <th style="width: 200px;">الماكينة / الخط</th>
-                                <th>الصنف المُنتَج</th>
-                                <th style="width: 140px;">الكمية المصنعة</th>
-                                <th style="width: 130px;">الهالك (كجم)</th>
-                                <th style="width: 70px; text-align: center;">حذف</th>
+                                <th style="width: 180px;">الماكينة / الخط</th>
+                                <th>الصنف المُنتج</th>
+                                <th style="width: 120px;">الكمية المصنعة</th>
+                                <th style="width: 110px;">الهالك (عدد)</th>
+                                <th style="width: 130px;">وقت التوقف (دقيقة)</th>
+                                <th style="width: 60px; text-align: center;">حذف</th>
                             </tr>
                         </thead>
                         <tbody id="machinesTableBody">
-                            <tr>
+                            <tr class="machine-line">
                                 <td>
-                                    <select class="form-control" required>
-                                        <option value="">اختر الماكينة</option>
-                                        <option value="خط حقن 1">خط حقن (1)</option>
-                                        <option value="خط حقن 2">خط حقن (2)</option>
-                                        <option value="خط نفخ 1">خط نفخ (1)</option>
-                                        <option value="خط نفخ 2">خط نفخ (2)</option>
+                                    <select class="form-control machineId" required>
+                                        <option value="" disabled selected>اختر الماكينة...</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required>
+                                    <select class="form-control productId" required>
+                                        <option value="" disabled selected>اختر الصنف...</option>
+                                    </select>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control" placeholder="العدد" required min="1">
                                 </td>
                                 <td>
-                                    <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
+                                    <input type="number" class="form-control" placeholder="العدد" step="1" value="0" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" placeholder="بالدقائق" step="1" value="0" min="0">
                                 </td>
                                 <td style="text-align: center;">
-                                    <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
+                                    <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)" style="display: none;">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -153,7 +196,7 @@
             </div>
             
             <button type="submit" class="btn-submit">
-                <i class="fa-solid fa-floppy-disk"></i> حفظ وترحيل بيانات الوردية لجميع الماكينات
+                <i class="fa-solid fa-floppy-disk"></i> حفظ وترحيل بيانات الوردية والكهرباء
             </button>
         </form>
     </main>
@@ -163,7 +206,56 @@
     </footer>
 
     <script>
-        const BASE_URL = "<?= scriptUrl ?>";
+        const BASE_URL = "<?= typeof scriptUrl !== 'undefined' ? scriptUrl : '' ?>";
+        let globalMachines = [];
+        let globalProducts = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("shiftDate").valueAsDate = new Date();
+            loadMasterData();
+
+            document.getElementById("hasRecharged").addEventListener("change", function() {
+                const amountGroup = document.getElementById("rechargeAmountGroup");
+                const uploadGroup = document.getElementById("receiptUploadGroup");
+                if (this.value === "نعم") {
+                    amountGroup.style.display = "block";
+                    uploadGroup.style.display = "block";
+                } else {
+                    amountGroup.style.display = "none";
+                    uploadGroup.style.display = "none";
+                    document.getElementById("rechargeAmount").value = "";
+                    document.getElementById("receiptImage").value = "";
+                }
+            });
+        });
+
+        function loadMasterData() {
+            google.script.run
+                .withSuccessHandler(function (data) {
+                    const machineSelect = document.querySelector(".machineId");
+                    if (machineSelect && data && data.machines) {
+                        globalMachines = data.machines;
+                        machineSelect.innerHTML = '<option value="" disabled selected>اختر الماكينة...</option>';
+                        globalMachines.forEach(machine => {
+                            machineSelect.innerHTML += `<option value="${machine}">${machine}</option>`;
+                        });
+                    }
+
+                    const productSelect = document.querySelector(".productId");
+                    if (productSelect && data && data.products) {
+                        globalProducts = data.products;
+                        productSelect.innerHTML = '<option value="" disabled selected>اختر الصنف...</option>';
+                        globalProducts.forEach(product => {
+                            productSelect.innerHTML += `<option value="${product}">${product}</option>`;
+                        });
+                    }
+                })
+                .withFailureHandler(function (error) {
+                    console.error("خطأ في جلب قاعدة البيانات:", error);
+                    alert("حدث خطأ في تحميل البيانات الأساسية.");
+                })
+                .getMasterData();
+        }
 
         function goHome(e) {
             e.preventDefault();
@@ -176,169 +268,123 @@
         }
 
         function addMachineRow() {
-            const tbody = document.getElementById('machinesTableBody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>
-                    <select class="form-control" required>
-                        <option value="">اختر الماكينة</option>
-                        <option value="خط حقن 1">خط حقن (1)</option>
-                        <option value="خط حقن 2">خط حقن (2)</option>
-                        <option value="خط نفخ 1">خط نفخ (1)</option>
-                        <option value="خط نفخ 2">خط نفخ (2)</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="text" class="form-control" placeholder="مثال: غطاء أزرق" required>
-                </td>
-                <td>
-                    <input type="number" class="form-control" placeholder="العدد" required min="1">
-                </td>
-                <td>
-                    <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
-                </td>
-                <td style="text-align: center;">
-                    <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            `;
+            const tbody = document.getElementById("machinesTableBody");
+            const firstRow = tbody.querySelector(".machine-line");
+            const newRow = firstRow.cloneNode(true);
+
+            newRow.querySelector(".machineId").value = "";
+            newRow.querySelector(".productId").value = "";
+            newRow.querySelectorAll("input").forEach(input => input.value = input.defaultValue || "0");
+            newRow.querySelector(".btn-delete-row").style.display = "inline-block";
+
             tbody.appendChild(newRow);
         }
 
         function removeMachineRow(btn) {
-            const tbody = document.getElementById('machinesTableBody');
-            if (tbody.rows.length > 1) {
-                btn.closest('tr').remove();
+            const tbody = document.getElementById("machinesTableBody");
+            if (tbody.querySelectorAll("tr").length > 1) {
+                btn.closest("tr").remove();
             } else {
-                alert('يجب تسجيل بيانات ماكينة واحدة على الأقل في الوردية.');
+                alert("يجب تسجيل بيانات ماكينة واحدة على الأقل في الوردية.");
             }
         }
 
-        function submitProduction(e) {
-            e.preventDefault();
-            alert('تم تسجيل وترحيل بيانات الإنتاج لجميع الماكينات بنجاح!');
+        function getFileBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
-        const BASE_URL = "<?= scriptUrl ?>";
 
-function goHome(e) {
-    e.preventDefault();
-    if (BASE_URL && BASE_URL.startsWith('http')) {
-        window.top.location.href = `${BASE_URL}?page=Home`;
-    } else {
-        const current = window.location.href.split('?')[0];
-        window.top.location.href = `${current}?page=Home`;
-    }
-}
+        async function submitProduction(e) {
+            e.preventDefault();
+            const submitBtn = document.querySelector(".btn-submit");
+            const originalText = submitBtn.innerHTML;
 
-// إضافة صف ماكينة جديد للجدول الديناميكي
-function addMachineRow() {
-    const tbody = document.getElementById('machinesTableBody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td>
-            <select class="form-control" required>
-                <option value="">اختر الماكينة</option>
-                <option value="خط حقن 1">خط حقن (1)</option>
-                <option value="خط حقن 2">خط حقن (2)</option>
-                <option value="خط نفخ 1">خط نفخ (1)</option>
-                <option value="خط نفخ 2">خط نفخ (2)</option>
-            </select>
-        </td>
-        <td>
-            <input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required>
-        </td>
-        <td>
-            <input type="number" class="form-control" placeholder="العدد" required min="1">
-        </td>
-        <td>
-            <input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0">
-        </td>
-        <td style="text-align: center;">
-            <button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button>
-        </td>
-    `;
-    tbody.appendChild(newRow);
-}
+            const shiftDate = document.getElementById("shiftDate").value;
+            const shiftType = document.getElementById("shiftType").value;
+            const notes = document.getElementById("notes").value;
+            const elec1 = Number(document.getElementById("elec1").value) || 0;
+            const elec2 = Number(document.getElementById("elec2").value) || 0;
+            const hasRecharged = document.getElementById("hasRecharged").value;
+            const rechargeAmount = hasRecharged === "نعم" ? (Number(document.getElementById("rechargeAmount").value) || 0) : 0;
 
-// حذف صف ماكينة
-function removeMachineRow(btn) {
-    const tbody = document.getElementById('machinesTableBody');
-    if (tbody.rows.length > 1) {
-        btn.closest('tr').remove();
-    } else {
-        alert('يجب تسجيل بيانات ماكينة واحدة على الأقل في الوردية.');
-    }
-}
+            const machines = [];
+            const rows = document.querySelectorAll("#machinesTableBody tr");
+            rows.forEach((row) => {
+                const inputs = row.querySelectorAll("input, select");
+                machines.push({
+                    machineName: inputs[0].value,
+                    productName: inputs[1].value,
+                    quantity: Number(inputs[2].value),
+                    waste: Number(inputs[3].value),
+                    downtimeMins: Number(inputs[4].value) || 0
+                });
+            });
 
-// إرسال بيانات الإنتاج عبر google.script.run
-function submitProduction(e) {
-    e.preventDefault();
-    const submitBtn = document.querySelector('.btn-submit');
-    const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري المعالجة...';
 
-    // جمع بيانات الوردية الأساسية
-    const shiftDate = document.getElementById('shiftDate').value;
-    const shiftType = document.getElementById('shiftType').value;
-    const notes = document.getElementById('notes').value;
+            try {
+                let receiptUrl = "لا توجد صورة";
+                const fileInput = document.getElementById("receiptImage");
 
-    // جمع بيانات جدول الماكينات الديناميكي
-    const machines = [];
-    const rows = document.querySelectorAll('#machinesTableBody tr');
-    rows.forEach(row => {
-        const inputs = row.querySelectorAll('input, select');
-        machines.push({
-            machineName: inputs[0].value,
-            productName: inputs[1].value,
-            quantity: Number(inputs[2].value),
-            waste: Number(inputs[3].value)
-        });
-    });
+                if (hasRecharged === "نعم" && fileInput.files.length > 0) {
+                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري رفع إيصال الكهرباء...';
+                    const file = fileInput.files[0];
+                    const base64Data = await getFileBase64(file);
+                    
+                    receiptUrl = await new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(resolve)
+                            .withFailureHandler(reject)
+                            .uploadElecReceiptImage(base64Data, file.name);
+                    });
+                }
 
-    const payload = {
-        shiftDate: shiftDate,
-        shiftType: shiftType,
-        notes: notes,
-        machines: machines
-    };
+                const payload = {
+                    shiftDate: shiftDate,
+                    shiftType: shiftType,
+                    notes: notes,
+                    elec1: elec1,
+                    elec2: elec2,
+                    hasRecharged: hasRecharged,
+                    rechargeAmount: rechargeAmount,
+                    receiptUrl: receiptUrl,
+                    machines: machines,
+                };
 
-    // تفعيل مؤشر التحميل
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري حفظ وت رحيل بيانات الوردية...';
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ في السجلات...';
 
-    // الربط مع الـ Backend
-    google.script.run
-        .withSuccessHandler(function(response) {
-            alert('تم حفظ وترحيل بيانات الإنتاج لجميع الماكينات بنجاح!');
-            document.getElementById('productionForm').reset();
-            
-            // إعادة ضبط الجدول لصف افتراضي واحد
-            document.getElementById('machinesTableBody').innerHTML = `
-                <tr>
-                    <td>
-                        <select class="form-control" required>
-                            <option value="">اختر الماكينة</option>
-                            <option value="خط حقن 1">خط حقن (1)</option>
-                            <option value="خط حقن 2">خط حقن (2)</option>
-                            <option value="خط نفخ 1">خط نفخ (1)</option>
-                            <option value="خط نفخ 2">خط نفخ (2)</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control" placeholder="مثال: عبوات 500 مل" required></td>
-                    <td><input type="number" class="form-control" placeholder="العدد" required min="1"></td>
-                    <td><input type="number" class="form-control" placeholder="وزن الهالك" step="0.1" value="0"></td>
-                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="removeMachineRow(this)"><i class="fa-solid fa-trash"></i></button></td>
-                </tr>
-            `;
-            
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        })
-        .withFailureHandler(function(error) {
-            alert('حدث خطأ أثناء الحفظ: ' + error.message);
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        })
-        .saveProductionData(payload); // دالة الـ Backend المستقبلية للإنتاج
-}
+                await new Promise((resolve, reject) => {
+                    google.script.run
+                        .withSuccessHandler(resolve)
+                        .withFailureHandler(reject)
+                        .saveProductionData(payload);
+                });
+
+                alert("تم حفظ بيانات الإنتاج والشحن بنجاح!");
+                document.getElementById("productionForm").reset();
+                document.getElementById("shiftDate").valueAsDate = new Date();
+                document.getElementById("rechargeAmountGroup").style.display = "none";
+                document.getElementById("receiptUploadGroup").style.display = "none";
+                
+                const tbody = document.getElementById("machinesTableBody");
+                while (tbody.children.length > 1) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+
+            }	 catch (error) {
+                alert("حدث خطأ: " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
     </script>
 </body>
 </html>

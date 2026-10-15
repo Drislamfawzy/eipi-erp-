@@ -1,8 +1,19 @@
 function doGet(e) {
   const page = (e && e.parameter && e.parameter.page) ? e.parameter.page.trim() : 'Home';
   
-  // تم إضافة 'Form_PettyCash' هنا لتفعيل التوجيه لشاشة العهدة
-  const allowedPages = ['Home', 'Index', 'Form_Dispatch', 'Form_Inbound', 'Dashboard', 'Form_PettyCash','Form_Advances', 'Form_Payroll'];
+  // تم إضافة 'Reports' لتفعيل التوجيه لمركز التقارير الشامل
+  const allowedPages = [
+    'Home', 
+    'Index', 
+    'Form_Dispatch', 
+    'Form_Inbound', 
+    'Dashboard', 
+    'Form_PettyCash', 
+    'Form_Advances', 
+    'Form_Payroll', 
+    'Form_Inventory',
+    'Reports'
+  ];
   
   const targetPage = allowedPages.includes(page) ? page : 'Home';
 
@@ -12,7 +23,7 @@ function doGet(e) {
     template.scriptUrl = ScriptApp.getService().getUrl();
     
     return template.evaluate()
-      .setTitle('EIPI Factory ERP - ' + targetPage)
+      .setTitle('Drislam ERP - ' + targetPage)
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   } catch (err) {

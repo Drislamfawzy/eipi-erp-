@@ -73,9 +73,14 @@ function processPayroll(payload) {
     // إجمالي الإضافات يضم الأوفر تايم ومكافأة الإنتاج
     var totalAdditions = overtimePay + fixedProductionBonus; 
     
-    // --- 4. أيام الراحة المستحقة ---
+   // --- 4. أيام الراحة المستحقة (الـ 4 جمع) ---
     var restDays = 0;
-    if (dailyWage !== 550) {
+    
+    // فحص الفئة: إذا كان المدير (أجر اليوم 550)، فلا توجد أيام راحة مضافة (تظل صفر)
+    if (dailyWage === 550) {
+      restDays = 0; 
+    } else {
+      // للعمال: تطبيق شرائح حضور أيام الراحة الأسبوعية
       if (attendanceDays >= 22 && attendanceDays <= 26) {
         restDays = 4;
       } else if (attendanceDays >= 15 && attendanceDays < 22) {
@@ -84,10 +89,19 @@ function processPayroll(payload) {
         restDays = 4;
       }
     }
-    var baseSalary = dailyWage * (attendanceDays + restDays);
     
-    // --- 5. عمولة مدير الإنتاج (لـ 24 ساعة) ---
-    var managerCommission = (dailyWage === 550) ? 6666.5 : 0;
+    var baseSalary = dailyWage * (attendanceDays + restDays);
+    // --- 5. عمولة مدير الإنتاج (ديناميكية بناءً على مبيعات العبوات الشهرية) ---
+var managerCommission = 0;
+if (dailyWage === 550) {
+  try {
+    managerCommission = getManagerMonthlyCommission(date);
+    Logger.log("عمولة مدير الإنتاج المحسوبة ديناميكياً لشهر تاريخ (" + date + ") = " + managerCommission);
+  } catch (err) {
+    Logger.log("خطأ في جلب عمولة المدير: " + err.message);
+    managerCommission = 0;
+  }
+}
     
     // --- 6. حساب صافي المستحق وإجمالي المرتب ---
     var netSalary = baseSalary - totalDeductions + totalAdditions + incentives + managerCommission;
@@ -185,5 +199,44 @@ function getEmployeesList() {
     return employees;
   } catch (e) {
     return ["خطأ في جلب الأسماء"];
+  }
+}
+/**
+ * دالة حساب إجمالي عمولة مدير الإنتاج شهرياً من شيت Dispatch (1.1 قرش لكل عبوة)
+ */
+function getManagerMonthlyCommission(payrollDateStr) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName("Dispatch");
+    if (!sheet || sheet.getLastRow() < 2) return 0;
+    
+    var data = sheet.getDataRange().getValues();
+    var payrollDate = payrollDateStr ? new Date(payrollDateStr) : new Date();
+    var targetYear = payrollDate.getFullYear();
+    var targetMonth = payrollDate.getMonth(); 
+    
+    var totalAbwaQty = 0;
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var rowDateVal = row[1] || row[0]; // تاريخ الإذن أو وقت التسجيل
+      var rowDate = new Date(rowDateVal);
+      
+      if (!isNaN(rowDate.getTime())) {
+        if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth) {
+          var itemName = String(row[4] || "").trim(); // اسم الصنف
+          var qty = Number(row[5]) || 0;              // الكمية المنصرفة
+          
+          if (itemName.includes("عبو")) {
+            totalAbwaQty += qty;
+          }
+        }
+      }
+    }
+    
+    return parseFloat((totalAbwaQty * 0.011).toFixed(2));
+  } catch (e) {
+    Logger.log("خطأ داخل getManagerMonthlyCommission: " + e.message);
+    return 0;
   }
 }
